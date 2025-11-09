@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daban | Modern Apparel</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure custom colors/font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#000000',
+                        'secondary': '#FFFFFF',
+                        'accent': '#E5E7EB',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Helvetica Neue', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for better look */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="bg-secondary text-primary font-sans">
+
+    <!-- HEADER & NAVIGATION -->
+    <header class="sticky top-0 z-50 bg-primary text-secondary shadow-lg border-b border-gray-700">
+        <div class="flex items-center justify-between p-3 md:p-4 max-w-7xl mx-auto">
+            <!-- LOGO INTEGRATION -->
+            <img src="https://placehold.co/160x50/000000/ffffff?text=DABAN%20%7C%20Studio" 
+                 alt="Daban Brand Logo" 
+                 class="h-8 md:h-10 cursor-pointer object-contain"
+                 onclick="switchView('shop')"
+            />
+            
+            <nav class="flex items-center space-x-4 md:space-x-8">
+                <!-- SHOP Button - remains for clarity but is primarily controlled by URL -->
+                <button onclick="switchView('shop')" id="navShop" 
+                    class="font-medium hover:text-gray-400 transition nav-link text-secondary">Shop</button>
+                
+                <!-- ADMIN BUTTON REMOVED for separation -->
+                
+                <button id="openCart" class="px-3 py-1 text-sm font-medium border border-secondary rounded-lg hover:bg-secondary hover:text-primary transition">
+                    Cart (<span id="cartCount">0</span>)
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- USER ID DISPLAY (Mandatory for multi-user/Firestore) -->
+    <div class="bg-accent p-2 text-xs text-center border-b border-primary">
+        Current User ID: <span id="userIdDisplay" class="font-mono text-primary break-all">Authenticating...</span>
+    </div>
+
+    <!-- 
+        =========================================================
+        MAIN SHOP VIEW (CUSTOMER FACING) 
+        =========================================================
+    -->
+    <div id="shopView" class="view hidden">
+        <!-- HERO SECTION -->
+        <section class="bg-accent text-primary text-center py-16 md:py-24">
+            <h2 class="text-4xl md:text-6xl font-extrabold mb-3">Monochrome Style. Timeless Quality.</h2>
+            <p class="text-lg md:text-xl font-light">Minimal design. Premium comfort. Shop Daban Apparel (GH₵).</p>
+        </section>
+
+        <!-- FILTER SECTION -->
+        <div class="flex flex-col md:flex-row justify-center items-center flex-wrap gap-4 py-6 px-4 bg-secondary border-b border-gray-200">
+            <div class="flex items-center space-x-2">
+                <label for="filterType" class="text-sm font-medium">Filter by Type:</label>
+                <select id="filterType" class="p-2 border border-primary rounded-lg bg-secondary text-sm"></select>
+            </div>
+            <div class="flex items-center space-x-2">
+                <label for="filterSize" class="text-sm font-medium">Filter by Size:</label>
+                <select id="filterSize" class="p-2 border border-primary rounded-lg bg-secondary text-sm"></select>
+            </div>
+        </div>
+
+        <!-- PRODUCT GRID SECTION -->
+        <section class="max-w-7xl mx-auto p-6 md:p-10">
+            <h2 class="text-3xl font-semibold mb-8 border-b pb-2 text-center md:text-left">Shop Collection</h2>
+            <div id="productsContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div id="loadingIndicator" class="col-span-full text-center p-10 text-gray-500">
+                    Loading products...
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 
+        =========================================================
+        ADMIN VIEW (MANAGEMENT ONLY) 
+        =========================================================
+    -->
+    <div id="adminView" class="view hidden">
+        <section class="bg-accent border-b border-primary py-10 px-6">
+            <div class="max-w-4xl mx-auto text-center">
+                <h3 class="text-4xl font-extrabold mb-3">Inventory & Order Management</h3>
+                <p class="text-gray-600">Secure access for Daban staff only.</p>
+            </div>
+        </section>
+
+        <section class="mt-8 py-10 px-6">
+            <div class="max-w-4xl mx-auto space-y-12">
+                
+                <!-- 1. PRODUCT MANAGEMENT -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 text-center">Manage Products</h3>
+                    <div class="bg-accent p-6 md:p-8 rounded-xl shadow-lg border border-primary">
+                        <h4 class="text-xl font-semibold mb-4 border-b pb-2">Add New Product</h4>
+                        <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="productName" placeholder="Product Name" required
+                                class="p-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary" />
+                            <input type="text" id="productType" placeholder="Type (e.g. Hoodie, Shirt)" required
+                                class="p-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary" />
+                            <input type="text" id="productSize" placeholder="Size (e.g. S, M, L or One Size)" required
+                                class="p-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary" />
+                            <input type="number" id="productPrice" step="0.01" placeholder="Price (GH₵)" required min="0.01"
+                                class="p-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary" />
+                            
+                            <!-- FILE INPUT -->
+                            <div class="md:col-span-2 space-y-2">
+                                <label for="productImageFile" class="block text-sm font-medium text-gray-700">Product Image (File Upload - Max 500KB)</label>
+                                <input type="file" id="productImageFile" accept="image/*" capture="environment" required
+                                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-secondary hover:file:bg-gray-700" />
+                            </div>
+
+                            <div id="imgPreview" class="md:col-span-2 text-center min-h-[50px] flex justify-center items-center"></div>
+                            
+                            <!-- Hidden input to store Base64 data before submission -->
+                            <input type="hidden" id="productImageBase64" />
+
+                            <button type="submit"
+                                class="md:col-span-2 bg-primary text-secondary p-3 rounded-md font-semibold hover:bg-gray-700 transition duration-200">
+                                Add Product
+                            </button>
+                        </form>
+                    </div>
+
+                     <h4 class="text-xl font-semibold mt-8 mb-4 border-b pb-2">Existing Products</h4>
+                    <div id="adminProductList" class="space-y-3">
+                        <p id="adminLoading" class="text-center p-4 text-gray-500">Loading products...</p>
+                        <!-- Existing product list will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 2. ORDER MANAGEMENT -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 text-center">Customer Order History</h3>
+                    <h4 class="text-xl font-semibold mb-4 border-b pb-2">All Orders</h4>
+                    <div id="adminOrderList" class="space-y-4">
+                        <p id="orderLoading" class="text-center p-4 text-gray-500">Loading orders...</p>
+                        <!-- Order list will be injected here -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-primary text-secondary p-8 mt-12">
+        <div class="text-center max-w-7xl mx-auto">
+            <p>&copy; 2025 Daban Apparel — Modern, Minimal, Monochrome.</p>
+        </div>
+    </footer>
+
+    <!-- CART DRAWER MODAL -->
+    <div id="cartDrawer" class="fixed right-0 top-0 w-full md:w-[400px] h-full bg-secondary shadow-2xl transform translate-x-full transition-transform duration-300 z-[1001] flex flex-col">
+        <div class="cart-header bg-primary text-secondary p-4 flex justify-between items-center">
+            <h3 class="text-xl font-bold">Your Cart</h3>
+            <button id="closeCart" class="text-2xl hover:text-gray-400 transition">×</button>
+        </div>
+        <div id="cartItems" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
+            <!-- Cart items here -->
+        </div>
+        <div class="cart-footer border-t border-primary p-4 space-y-3">
+            <div class="flex justify-between font-bold text-lg">
+                <span>Total:</span>
+                <span>GH₵<span id="cartTotal">0.00</span></span>
+            </div>
+            <button id="checkoutBtn"
+                class="w-full bg-primary text-secondary p-3 rounded-lg font-semibold hover:bg-gray-700 transition duration-200">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- CUSTOM ALERT/MODAL UI -->
+    <div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[2000] items-center justify-center p-4">
+        <div class="bg-secondary p-6 rounded-xl shadow-2xl w-full max-w-sm border border-primary">
+            <h4 id="modalTitle" class="text-xl font-bold mb-3">Notification</h4>
+            <p id="modalMessage" class="mb-5 text-gray-700"></p>
+            <div id="modalActions" class="flex justify-end space-x-3">
+                <button id="modalConfirm" class="px-4 py-2 bg-primary text-secondary rounded-lg font-medium hover:bg-gray-700 transition hidden">
+                    Confirm
+                </button>
+                <button id="modalClose" class="px-4 py-2 bg-accent text-primary rounded-lg font-medium border border-primary hover:bg-gray-200 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, addDoc, deleteDoc, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        setLogLevel('Debug');
+
+        // --- GLOBAL SETUP ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // Check if initialAuthToken is defined, otherwise set to null
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
+
+        let db, auth, userId = null;
+        let isAuthReady = false;
+
+        // --- DOM Elements ---
+        const shopView = document.getElementById("shopView");
+        const adminView = document.getElementById("adminView");
+        const navShop = document.getElementById("navShop");
+        // navAdmin button removed
+        const productsContainer = document.getElementById("productsContainer");
+        const productForm = document.getElementById("productForm");
+        const filterType = document.getElementById("filterType");
+        const filterSize = document.getElementById("filterSize");
+        const productImageFile = document.getElementById("productImageFile");
+        const productImageBase64 = document.getElementById("productImageBase64");
+        const imgPreview = document.getElementById("imgPreview");
+        const cartDrawer = document.getElementById("cartDrawer");
+        const openCartBtn = document.getElementById("openCart");
+        const closeCartBtn = document.getElementById("closeCart");
+        const cartItemsDiv = document.getElementById("cartItems");
+        const cartTotalSpan = document.getElementById("cartTotal");
+        const cartCountSpan = document.getElementById("cartCount");
+        const userIdDisplay = document.getElementById("userIdDisplay");
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        const adminProductList = document.getElementById("adminProductList");
+        const adminLoading = document.getElementById("adminLoading");
+        const adminOrderList = document.getElementById("adminOrderList");
+        const orderLoading = document.getElementById("orderLoading");
+
+
+        // --- Data Variables ---
+        let products = [];
+        let cart = [];
+        let orders = []; 
+        let productSnapshotUnsubscribe = () => {};
+        let cartSnapshotUnsubscribe = () => {};
+        let orderSnapshotUnsubscribe = () => {}; 
+        
+        // --- VIEW SWITCHING LOGIC ---
+        function switchView(viewName) {
+            // Remove unnecessary class logic as admin link is removed from nav
+            if (viewName === 'shop') {
+                shopView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+            } else if (viewName === 'admin') {
+                shopView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+            }
+        }
+        
+        // --- INITIAL VIEW SELECTION BASED ON URL PARAMETER ---
+        function initializeView() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewParam = urlParams.get('view');
+            
+            if (viewParam === 'admin') {
+                switchView('admin');
+                // Optional: show a message that admin access is enabled via URL
+                console.log("Admin View enabled via URL parameter: '?view=admin'.");
+            } else {
+                switchView('shop');
+            }
+        }
+
+        // Start on the appropriate view based on URL
+        initializeView(); 
+
+
+        // --- FIREBASE INITIALIZATION & AUTH ---
+        if (firebaseConfig) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    userIdDisplay.textContent = userId;
+                } else {
+                    // Fallback to anonymous sign-in if no user is found after the token attempt
+                    try {
+                         await signInAnonymously(auth);
+                    } catch (error) {
+                         console.error("Anonymous sign-in failed:", error);
+                    }
+                }
+                isAuthReady = true;
+                if (userId) {
+                    // Only start listeners once auth is confirmed and userId is set
+                    initializeDataListeners();
+                }
+            });
+
+            // Initial token sign-in attempt (non-blocking)
+            if (initialAuthToken) {
+                signInWithCustomToken(auth, initialAuthToken).catch(e => {
+                    console.warn("Initial token sign-in failed, relying on onAuthStateChanged:", e.message);
+                });
+            }
+        } else {
+             console.error("Firebase configuration is missing. Cannot initialize database.");
+             isAuthReady = true;
+             loadingIndicator.textContent = "Database not configured. Using mock data only.";
+        }
+
+        // --- FIRESTORE PATHS ---
+        const productCollectionPath = `artifacts/${appId}/public/data/products`;
+        const orderCollectionPath = `artifacts/${appId}/public/data/orders`; 
+        const getCartCollectionPath = (uid) => `artifacts/${appId}/users/${uid}/cart`;
+
+
+        // --- CUSTOM MODAL FUNCTIONS (Replaces alert/confirm) ---
+
+        const customModal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirm = document.getElementById('modalConfirm');
+
+        let resolveModalPromise = null;
+
+        document.getElementById('modalClose').addEventListener('click', () => {
+            customModal.classList.add('hidden');
+            customModal.classList.remove('flex');
+            if (resolveModalPromise) resolveModalPromise(false);
+            resolveModalPromise = null;
+        });
+
+        modalConfirm.addEventListener('click', () => {
+            customModal.classList.add('hidden');
+            customModal.classList.remove('flex');
+            if (resolveModalPromise) resolveModalPromise(true);
+            resolveModalPromise = null;
+        });
+
+        function showModal(title, message, isConfirmation = false) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            
+            modalConfirm.classList.toggle('hidden', !isConfirmation);
+            
+            customModal.classList.remove('hidden');
+            customModal.classList.add('flex');
+
+            if (isConfirmation) {
+                return new Promise(resolve => {
+                    resolveModalPromise = resolve;
+                });
+            }
+        }
+        
+        // --- REAL-TIME DATA LISTENERS ---
+
+        function initializeDataListeners() {
+            if (!db || !userId) return;
+
+            // PRODUCTS Listener (Public Data)
+            productSnapshotUnsubscribe = onSnapshot(collection(db, productCollectionPath), (snapshot) => {
+                products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                loadingIndicator.classList.add('hidden');
+                adminLoading.classList.add('hidden');
+
+                populateFilters();
+                renderProducts();
+                renderAdminProducts();
+            }, (error) => {
+                console.error("Error fetching products:", error);
+                loadingIndicator.textContent = "Error loading products.";
+            });
+
+            // ORDERS Listener (Public Data)
+            orderSnapshotUnsubscribe = onSnapshot(collection(db, orderCollectionPath), (snapshot) => {
+                orders = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    // Parse the JSON stringified items back into an array
+                    // Check if items is a string before parsing
+                    data.items = typeof data.items === 'string' ? JSON.parse(data.items) : []; 
+                    return { id: doc.id, ...data };
+                });
+                orderLoading.classList.add('hidden');
+                renderAdminOrders();
+            }, (error) => {
+                console.error("Error fetching orders:", error);
+                orderLoading.textContent = "Error loading orders.";
+            });
+
+
+            // CART Listener (Private Data)
+            cartSnapshotUnsubscribe = onSnapshot(collection(db, getCartCollectionPath(userId)), (snapshot) => {
+                cart = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateCartDisplay();
+            }, (error) => {
+                console.error("Error fetching cart:", error);
+            });
+        }
+
+
+        // --- PRODUCT RENDERING & FILTERING ---
+
+        function getProductImage(product) {
+            // Priority 1: Base64 data (from admin upload)
+            if (product.imageBase64) {
+                return product.imageBase64;
+            }
+            // Fallback
+            return "https://placehold.co/300x250/000/fff?text=No+Image";
+        }
+
+        function populateFilters() {
+            const types = [...new Set(products.map(p => p.type).filter(Boolean))].sort();
+            const sizes = [...new Set(products.map(p => p.size).filter(Boolean))].sort();
+
+            [filterType, filterSize].forEach(sel => {
+                while (sel.options.length > 0) sel.remove(0);
+                sel.add(new Option("All", "all"));
+            });
+
+            types.forEach(t => filterType.add(new Option(t, t)));
+            sizes.forEach(s => filterSize.add(new Option(s, s)));
+        }
+
+        function renderProducts() {
+            const typeFilter = filterType.value;
+            const sizeFilter = filterSize.value;
+            productsContainer.innerHTML = "";
+
+            const filtered = products.filter(p => {
+                // Check if product type exists, trim it, and compare
+                const productTypeTrimmed = p.type ? p.type.trim() : '';
+                // Check if product size exists, trim it, and compare
+                const productSizeTrimmed = p.size ? p.size.trim() : '';
+                
+                const matchesType = typeFilter === "all" || productTypeTrimmed === typeFilter;
+                const matchesSize = sizeFilter === "all" || productSizeTrimmed === sizeFilter;
+                return matchesType && matchesSize;
+            });
+
+
+            if (filtered.length === 0) {
+                 productsContainer.innerHTML = `<p class="col-span-full text-center p-10 text-gray-500">No products match your filters.</p>`;
+                 return;
+            }
+
+            filtered.forEach(p => {
+                const productElement = document.createElement("div");
+                productElement.className = "product bg-secondary rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1 overflow-hidden group border border-gray-100";
+                
+                const imageUrl = getProductImage(p);
+
+                // Ensure price is a number for the inline click event
+                const safePrice = p.price && !isNaN(p.price) ? p.price : 0; 
+
+                productElement.innerHTML = `
+                    <img src="${imageUrl}" alt="${p.name}" class="w-full h-48 object-cover object-center group-hover:opacity-80 transition duration-300"
+                        onerror="this.onerror=null; this.src='https://placehold.co/300x250/000/fff?text=Image+Error';" />
+                    <div class="p-4 text-center">
+                        <h3 class="text-lg font-semibold mb-1">${p.name}</h3>
+                        <p class="text-sm text-gray-500">Type: ${p.type || '-'} | Size: ${p.size || '-'}</p>
+                        <p class="text-xl font-bold mt-2 mb-4">GH₵${safePrice.toFixed(2)}</p>
+                        <button onclick="window.addToCartFirestore('${p.id}', '${p.name}', ${safePrice}, 1)" 
+                                class="w-full bg-primary text-secondary p-2 rounded-md font-medium group-hover:bg-gray-700 transition duration-200">
+                            Add to Cart
+                        </button>
+                    </div>
+                `;
+                productsContainer.appendChild(productElement);
+            });
+        }
+        
+        function renderAdminProducts() {
+            adminProductList.innerHTML = "";
+            if (products.length === 0) {
+                 adminProductList.innerHTML = `<p class="text-center p-4 text-gray-500">No products currently listed.</p>`;
+                 return;
+            }
+
+            products.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-3 bg-white border border-gray-200 rounded-lg shadow-sm';
+                
+                const imageUrl = getProductImage(p);
+                const safePrice = p.price && !isNaN(p.price) ? p.price : 0;
+
+                item.innerHTML = `
+                    <div class="flex items-center space-x-4 min-w-0 flex-1">
+                        <img src="${imageUrl}" alt="${p.name}" class="w-10 h-10 object-cover rounded-full flex-shrink-0"
+                            onerror="this.onerror=null; this.src='https://placehold.co/40x40/000/fff?text=X';" />
+                        <div class="min-w-0">
+                            <p class="font-medium truncate">${p.name}</p>
+                            <p class="text-sm text-gray-500">GH₵${safePrice.toFixed(2)} | Type: ${p.type || '-'}</p>
+                        </div>
+                    </div>
+                    <button onclick="window.deleteProductFirestore('${p.id}', '${p.name}')" 
+                        class="text-red-600 hover:text-red-800 transition p-2 flex-shrink-0" title="Delete Product">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 10-2 0v6a1 1 0 102 0V8z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                `;
+                adminProductList.appendChild(item);
+            });
+        }
+
+        // --- ADMIN ORDER RENDERING ---
+        function renderAdminOrders() {
+            adminOrderList.innerHTML = "";
+            if (orders.length === 0) {
+                 adminOrderList.innerHTML = `<p class="text-center p-4 text-gray-500">No customer orders have been placed yet.</p>`;
+                 return;
+            }
+
+            // Sort orders by date descending
+            const sortedOrders = orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+            sortedOrders.forEach(o => {
+                const item = document.createElement('div');
+                item.className = 'bg-white p-4 rounded-xl shadow-lg border border-gray-200';
+                
+                const date = new Date(o.orderDate).toLocaleString();
+                
+                // Ensure o.items is an array before mapping
+                const itemsHtml = Array.isArray(o.items) ? o.items.map(i => 
+                    `<li class="text-sm text-gray-600">${i.name} (${i.qty} x GH₵${(i.price || 0).toFixed(2)})</li>`
+                ).join('') : '<li class="text-sm text-red-500">Error loading items data.</li>';
+
+                item.innerHTML = `
+                    <div class="flex justify-between items-start mb-3 border-b pb-2">
+                        <div class="font-bold text-xl text-primary">Order # ${o.id.substring(0, 8)}</div>
+                        <span class="text-2xl font-bold text-green-600">GH₵${(o.total || 0).toFixed(2)}</span>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mb-2">
+                        <strong class="text-primary">Customer ID:</strong> ${o.userId.substring(0, 12)}...
+                    </p>
+                    <p class="text-xs text-gray-500 mb-3">
+                        <strong class="text-primary">Date:</strong> ${date}
+                    </p>
+
+                    <h5 class="text-sm font-semibold mb-1">Items Ordered:</h5>
+                    <ul class="list-disc pl-5 space-y-1">${itemsHtml}</ul>
+                `;
+                adminOrderList.appendChild(item);
+            });
+        }
+
+
+        // --- ADMIN FILE UPLOAD & PREVIEW LOGIC ---
+
+        productImageFile.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) {
+                imgPreview.innerHTML = "";
+                productImageBase64.value = "";
+                return;
+            }
+
+            if (file.size > 500 * 1024) { // Limit file size to 500KB for base64 storage
+                 showModal("File Too Large", "Please select an image smaller than 500KB for product listing.");
+                 productImageFile.value = ""; // Clear the input
+                 imgPreview.innerHTML = "";
+                 productImageBase64.value = "";
+                 return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64String = e.target.result;
+                // Store the Base64 string in the hidden input for form submission
+                productImageBase64.value = base64String;
+
+                // Display preview
+                imgPreview.innerHTML = `
+                    <img src='${base64String}' alt='Image Preview' 
+                    class='w-40 h-40 object-cover rounded-lg mt-4 border border-gray-300 shadow-md' />
+                `;
+            };
+            reader.onerror = () => {
+                showModal("Error", "Failed to read the selected file.");
+                productImageBase64.value = "";
+                imgPreview.innerHTML = "";
+            };
+            reader.readAsDataURL(file);
+        });
+
+
+        // --- ADMIN FIREBASE FUNCTIONS ---
+
+        productForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!isAuthReady || !userId) {
+                return showModal("Error", "Authentication is not ready. Please wait a moment.");
+            }
+
+            const name = productForm.productName.value.trim();
+            const type = productForm.productType.value.trim();
+            const size = productForm.productSize.value.trim();
+            const price = parseFloat(productForm.productPrice.value);
+            const imageBase64 = productImageBase64.value; // Get Base64 data
+
+            // ENHANCEMENT: Input Validation
+            if (!name || !type || !size || !imageBase64) {
+                return showModal("Validation Error", "Please ensure all text fields and an image are provided.");
+            }
+            if (isNaN(price) || price <= 0) {
+                 return showModal("Validation Error", "Price must be a valid positive number greater than zero (in GH₵).");
+            }
+            
+            try {
+                const newProduct = { 
+                    name, 
+                    type, 
+                    size, 
+                    price: price, // Ensure price is a number
+                    imageBase64, 
+                    createdAt: new Date().toISOString() 
+                };
+                
+                await addDoc(collection(db, productCollectionPath), newProduct);
+                
+                // Reset form and preview
+                productForm.reset();
+                productImageBase64.value = "";
+                imgPreview.innerHTML = "";
+                showModal("Success", `Product "${name}" added to the shop!`);
+            } catch (error) {
+                console.error("Error adding product:", error);
+                showModal("Error", "Failed to add product. Check console for details.");
+            }
+        });
+
+        window.deleteProductFirestore = async (productId, productName) => {
+            if (!isAuthReady || !userId) return;
+
+            const confirmed = await showModal(
+                "Confirm Deletion",
+                `Are you sure you want to permanently delete "${productName}"?`,
+                true
+            );
+
+            if (confirmed) {
+                try {
+                    await deleteDoc(doc(db, productCollectionPath, productId));
+                    showModal("Deleted", `Product "${productName}" has been removed.`);
+                } catch (error) {
+                    console.error("Error deleting product:", error);
+                    showModal("Error", "Failed to delete product. Check console for details.");
+                }
+            }
+        };
+
+
+        // --- CART FIREBASE FUNCTIONS ---
+
+        window.addToCartFirestore = async (productId, productName, price, quantity = 1) => {
+            if (!isAuthReady || !userId) return; 
+            
+            // ENHANCEMENT: Validate incoming quantity and price
+            if (quantity <= 0) {
+                return showModal("Error", "Quantity must be greater than zero.");
+            }
+            if (price <= 0) {
+                 return showModal("Error", "Cannot add an item with a price less than or equal to zero (in GH₵).");
+            }
+
+            try {
+                const cartRef = collection(db, getCartCollectionPath(userId));
+                const q = query(cartRef, where("productId", "==", productId));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    await addDoc(cartRef, {
+                        productId,
+                        name: productName,
+                        price: price,
+                        qty: quantity
+                    });
+                } else {
+                    const cartItemDoc = querySnapshot.docs[0];
+                    const currentQty = cartItemDoc.data().qty;
+                    await updateDoc(doc(db, getCartCollectionPath(userId), cartItemDoc.id), {
+                        qty: currentQty + quantity
+                    });
+                }
+
+                showModal("Added to Cart", `${productName} added to your cart.`);
+            } catch (error) {
+                console.error("Error adding to cart:", error);
+                showModal("Error", "Failed to add item to cart. Check console.");
+            }
+        };
+        
+        window.updateCartQuantity = async (cartItemId, newQty, itemName) => {
+            if (!isAuthReady || !userId) return;
+            
+            const itemRef = doc(db, getCartCollectionPath(userId), cartItemId);
+
+            if (newQty <= 0) {
+                 // If the user tries to set quantity to zero or less, confirm removal
+                 const confirmed = await showModal(
+                    "Remove Item",
+                    `Do you want to completely remove ${itemName} from your cart?`,
+                    true
+                );
+
+                if (confirmed) {
+                    await deleteDoc(itemRef);
+                    showModal("Removed", `${itemName} removed from cart.`);
+                } else {
+                    // Re-render to revert the quantity back if the user cancels removal
+                    // This is handled automatically by the onSnapshot listener, but we ensure to update the display if needed
+                    updateCartDisplay(); 
+                }
+            } else {
+                try {
+                    // Update the quantity directly
+                    await updateDoc(itemRef, { qty: newQty });
+                } catch (error) {
+                    console.error("Error updating quantity:", error);
+                    showModal("Error", "Failed to update item quantity. Check console.");
+                }
+            }
+        }
+
+
+        window.removeFromCartFirestore = async (cartItemId, itemName) => {
+            if (!isAuthReady || !userId) return;
+
+            const confirmed = await showModal(
+                "Confirm Removal",
+                `Are you sure you want to permanently remove ${itemName} from your cart?`,
+                true
+            );
+
+            if (confirmed) {
+                try {
+                    await deleteDoc(doc(db, getCartCollectionPath(userId), cartItemId));
+                    showModal("Removed", `${itemName} removed from cart.`);
+                } catch (error) {
+                    console.error("Error removing from cart:", error);
+                    showModal("Error", "Failed to remove item. Check console.");
+                }
+            }
+        };
+
+        function updateCartDisplay() {
+            cartItemsDiv.innerHTML = "";
+            let total = 0;
+            
+            if (cart.length === 0) {
+                 cartItemsDiv.innerHTML = `<p class="text-center py-8 text-gray-500">Your cart is empty.</p>`;
+                 cartTotalSpan.textContent = "0.00";
+                 cartCountSpan.textContent = "0";
+                 document.getElementById('checkoutBtn').disabled = true;
+                 document.getElementById('checkoutBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                 return;
+            }
+            
+            document.getElementById('checkoutBtn').disabled = false;
+            document.getElementById('checkoutBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+
+            cart.forEach(item => {
+                const safePrice = item.price && !isNaN(item.price) && item.price > 0 ? item.price : 0;
+                const safeQty = item.qty && !isNaN(item.qty) && item.qty > 0 ? item.qty : 0;
+                
+                total += safePrice * safeQty;
+                
+                const div = document.createElement("div");
+                div.className = "cart-item flex items-center border-b pb-3 pt-3 gap-3";
+                div.innerHTML = `
+                    <div class="flex-1 min-w-0">
+                        <strong class="block truncate">${item.name}</strong>
+                        <span class="text-sm text-gray-600">GH₵${safePrice.toFixed(2)} / unit</span>
+                    </div>
+                    
+                    <div class="flex items-center border border-gray-300 rounded-md">
+                        <button onclick="window.updateCartQuantity('${item.id}', ${safeQty - 1}, '${item.name}')" 
+                                class="w-8 h-8 flex items-center justify-center text-lg hover:bg-gray-100 rounded-l-md transition"
+                                title="Decrease Quantity">
+                            -
+                        </button>
+                        <span class="px-3 text-sm font-medium">${safeQty}</span>
+                        <button onclick="window.updateCartQuantity('${item.id}', ${safeQty + 1}, '${item.name}')" 
+                                class="w-8 h-8 flex items-center justify-center text-lg hover:bg-gray-100 rounded-r-md transition"
+                                title="Increase Quantity">
+                            +
+                        </button>
+                    </div>
+
+                    <button onclick="window.removeFromCartFirestore('${item.id}', '${item.name}')" 
+                            class="text-red-500 hover:text-red-700 transition ml-2 flex-shrink-0" title="Remove all units">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 10-2 0v6a1 1 0 102 0V8z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                `;
+                cartItemsDiv.appendChild(div);
+            });
+
+            cartTotalSpan.textContent = total.toFixed(2);
+            cartCountSpan.textContent = cart.reduce((a, b) => a + ((b.qty && b.qty > 0 ? b.qty : 0) || 0), 0);
+        }
+
+        document.getElementById('checkoutBtn').addEventListener('click', async () => {
+            if (cart.length === 0) {
+                return showModal("Cart Empty", "Your cart is empty. Add some monochrome style first!");
+            }
+
+            const total = parseFloat(cartTotalSpan.textContent);
+
+            const confirmed = await showModal(
+                "Confirm Purchase",
+                `Confirm purchase for GH₵${total.toFixed(2)}? (This will be recorded as a new order.)`,
+                true
+            );
+
+            if (confirmed) {
+                try {
+                    // 1. PREPARE ORDER DATA
+                    const orderItems = cart.map(item => ({
+                        name: item.name,
+                        qty: item.qty,
+                        price: item.price
+                    }));
+
+                    // 2. SAVE ORDER TO PUBLIC COLLECTION
+                    await addDoc(collection(db, orderCollectionPath), {
+                        userId: userId,
+                        items: JSON.stringify(orderItems), // CRITICAL: Serialize complex array structure
+                        total: total,
+                        orderDate: new Date().toISOString()
+                    });
+                    
+                    // 3. CLEAR CART 
+                    const cartItemsSnapshot = await getDocs(collection(db, getCartCollectionPath(userId)));
+                    const deletePromises = cartItemsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+                    await Promise.all(deletePromises);
+
+                    showModal("Order Success", "Your order has been successfully placed! Check the Admin panel to see it recorded.", false);
+                    closeCartDrawer();
+                } catch (error) {
+                    console.error("Checkout failed:", error);
+                    showModal("Checkout Failed", "Could not complete checkout. Please check the console for errors.");
+                }
+            }
+        });
+
+        // --- UI Event Handlers ---
+        
+        openCartBtn.addEventListener("click", () => cartDrawer.classList.remove("translate-x-full"));
+        closeCartBtn.addEventListener("click", closeCartDrawer);
+        
+        function closeCartDrawer() {
+             cartDrawer.classList.add("translate-x-full");
+        }
+
+        [filterType, filterSize].forEach(sel => sel.addEventListener("change", renderProducts));
+
+        // Expose functions globally for use in inline HTML event handlers
+        window.addToCartFirestore = window.addToCartFirestore;
+        window.removeFromCartFirestore = window.removeFromCartFirestore;
+        window.deleteProductFirestore = window.deleteProductFirestore;
+        window.updateCartQuantity = window.updateCartQuantity;
+        window.switchView = switchView; // Expose switchView for the 'Shop' button/logo
+    </script>
+</body>
+</html>
+
