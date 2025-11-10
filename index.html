@@ -653,10 +653,15 @@
 
         // --- ADMIN FIREBASE FUNCTIONS ---
 
+        // --- ADMIN FIREBASE FUNCTIONS ---
+
         productForm.addEventListener("submit", async (e) => {
             e.preventDefault();
+            
+            // CRITICAL CHECK: Ensure authentication is complete
             if (!isAuthReady || !userId) {
-                return showModal("Error", "Authentication is not ready. Please wait a moment.");
+                showModal("Error", "Authentication is not ready. Please wait a moment.");
+                return; // Stop execution immediately if not ready
             }
 
             const name = productForm.productName.value.trim();
@@ -696,25 +701,6 @@
             }
         });
 
-        window.deleteProductFirestore = async (productId, productName) => {
-            if (!isAuthReady || !userId) return;
-
-            const confirmed = await showModal(
-                "Confirm Deletion",
-                `Are you sure you want to permanently delete "${productName}"?`,
-                true
-            );
-
-            if (confirmed) {
-                try {
-                    await deleteDoc(doc(db, productCollectionPath, productId));
-                    showModal("Deleted", `Product "${productName}" has been removed.`);
-                } catch (error) {
-                    console.error("Error deleting product:", error);
-                    showModal("Error", "Failed to delete product. Check console for details.");
-                }
-            }
-        };
 
 
         // --- CART FIREBASE FUNCTIONS ---
