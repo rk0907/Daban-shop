@@ -357,7 +357,11 @@
         // --- REAL-TIME DATA LISTENERS ---
 
         function initializeDataListeners() {
-            if (!db || !userId) return;
+            // CRITICAL GUARD: Only run if Firestore DB and User ID are set
+            if (!db || !userId) {
+                console.error("Data Listener blocked: DB or User ID not ready.");
+                return;
+            }
 
             // PRODUCTS Listener (Public Data)
             productSnapshotUnsubscribe = onSnapshot(collection(db, productCollectionPath), (snapshot) => {
@@ -792,7 +796,6 @@
         };
 
         function updateCartDisplay() {
-            // ... (cart update logic remains the same) ...
             cartItemsDiv.innerHTML = "";
             let total = 0;
             
