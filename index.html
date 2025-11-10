@@ -317,42 +317,59 @@
         initializeView(); 
 
 
-        // --- FIREBASE INITIALIZATION & AUTH ---
-        if (firebaseConfig) {
+               // --- FIREBASE INITIALIZATION & AUTH (Optimized) ---
+        // New structure: Force initial sign-in (token or anonymous) to complete, 
+        // then finalize the state and start data listeners.
+        
+        async function initFirebase() {
+            if (!firebaseConfig) {
+                 console.error("Firebase configuration is missing. Cannot initialize database.");
+                 isAuthReady = true;
+                 loadingIndicator.textContent = "Database not configured. Using mock data only.";
+                 return;
+            }
+
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+            
+            // 1. FORCE INITIAL SIGN-IN (Blocking Call)
+            try {
+                if (initialAuthToken) {
+                    // Attempt custom token sign-in and WAIT for it to complete
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Initial sign-in: Custom token successful.");
+                } else {
+                    // Fallback to anonymous sign-in and WAIT for it to complete
+                    await signInAnonymously(auth);
+                    console.log("Initial sign-in: Anonymous successful.");
+                }
+            } catch (e) {
+                console.error("Initial sign-in attempt failed. App may be unstable:", e.message);
+                // The onAuthStateChanged listener below will still try to pick up the state if it eventually resolves.
+            }
 
-            onAuthStateChanged(auth, async (user) => {
+            // 2. SET UP FINAL STATE LISTENER
+            // This listener will capture the final userId and only then initialize data.
+            onAuthStateChanged(auth, (user) => {
                 if (user) {
                     userId = user.uid;
-                    userIdDisplay.textContent = userId;
                 } else {
-                    // Fallback to anonymous sign-in if no user is found after the token attempt
-                    try {
-                         await signInAnonymously(auth);
-                    } catch (error) {
-                         console.error("Anonymous sign-in failed:", error);
-                    }
+                    // Safeguard if no user is present
+                    userId = 'unauthenticated-fallback'; 
                 }
+                
+                // Finalize authentication state and start the app data flow
+                userIdDisplay.textContent = userId;
                 isAuthReady = true;
-                if (userId) {
-                    // Only start listeners once auth is confirmed and userId is set
-                    initializeDataListeners();
-                }
+                initializeDataListeners();
+                console.log("Auth State Finalized. User ID:", userId);
             });
-
-            // Initial token sign-in attempt (non-blocking)
-            if (initialAuthToken) {
-                signInWithCustomToken(auth, initialAuthToken).catch(e => {
-                    console.warn("Initial token sign-in failed, relying on onAuthStateChanged:", e.message);
-                });
-            }
-        } else {
-             console.error("Firebase configuration is missing. Cannot initialize database.");
-             isAuthReady = true;
-             loadingIndicator.textContent = "Database not configured. Using mock data only.";
         }
+        
+        // Start the optimized initialization process immediately.
+        initFirebase();
+
 
         // --- FIRESTORE PATHS ---
         const productCollectionPath = `artifacts/${appId}/public/data/products`;
