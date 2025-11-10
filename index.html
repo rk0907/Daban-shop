@@ -58,7 +58,7 @@
     <header class="sticky top-0 z-50 bg-primary text-secondary shadow-lg border-b border-gray-700">
         <div class="flex items-center justify-between p-3 md:p-4 max-w-7xl mx-auto">
             <!-- LOGO INTEGRATION -->
-            <img src="https://placehold.co/160x50/000000/ffffff?text=DABAN%20%7C%20Studio" 
+            <img src="https://placehold.co/160x50/000000/ffffff?text=DABAN%20%7C%20Shop" 
                  alt="Daban Brand Logo" 
                  class="h-8 md:h-10 cursor-pointer object-contain"
                  onclick="switchView('shop')"
@@ -150,10 +150,10 @@
                             <input type="number" id="productPrice" step="0.01" placeholder="Price (GH₵)" required min="0.01"
                                 class="p-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary" />
                             
-                            <!-- FILE INPUT - MODIFIED FOR MOBILE CAPTURE -->
+                            <!-- FILE INPUT - MODIFIED: Removed 'capture' for better gallery access -->
                             <div class="md:col-span-2 space-y-2">
                                 <label for="productImageFile" class="block text-sm font-medium text-gray-700">Product Image (File Upload - Max 500KB)</label>
-                                <input type="file" id="productImageFile" accept="image/*" capture="environment" required
+                                <input type="file" id="productImageFile" accept="image/*" required
                                     class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-secondary hover:file:bg-gray-700" />
                             </div>
 
