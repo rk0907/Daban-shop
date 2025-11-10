@@ -57,7 +57,7 @@
     <!-- HEADER & NAVIGATION -->
     <header class="sticky top-0 z-50 bg-primary text-secondary shadow-lg border-b border-gray-700">
         <div class="flex items-center justify-between p-3 md:p-4 max-w-7xl mx-auto">
-            <!-- LOGO INTEGRATION -->
+            <!-- LOGO INTEGRATION (Placeholder, replace src with your Base64 or public URL) -->
             <img src="https://placehold.co/160x50/000000/ffffff?text=DABAN%20%7C%20Shop" 
                  alt="Daban Brand Logo" 
                  class="h-8 md:h-10 cursor-pointer object-contain"
@@ -150,7 +150,7 @@
                             <input type="number" id="productPrice" step="0.01" placeholder="Price (GH₵)" required min="0.01"
                                 class="p-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary" />
                             
-                            <!-- FILE INPUT - MODIFIED: Removed 'capture' for better gallery access -->
+                            <!-- FILE INPUT - Optimized for gallery access on mobile -->
                             <div class="md:col-span-2 space-y-2">
                                 <label for="productImageFile" class="block text-sm font-medium text-gray-700">Product Image (File Upload - Max 500KB)</label>
                                 <input type="file" id="productImageFile" accept="image/*" required
@@ -247,7 +247,6 @@
         // --- GLOBAL SETUP ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        // Check if initialAuthToken is defined, otherwise set to null
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
 
         let db, auth, userId = null;
@@ -256,8 +255,6 @@
         // --- DOM Elements ---
         const shopView = document.getElementById("shopView");
         const adminView = document.getElementById("adminView");
-        const navShop = document.getElementById("navShop");
-        // navAdmin button removed
         const productsContainer = document.getElementById("productsContainer");
         const productForm = document.getElementById("productForm");
         const filterType = document.getElementById("filterType");
@@ -266,17 +263,14 @@
         const productImageBase64 = document.getElementById("productImageBase64");
         const imgPreview = document.getElementById("imgPreview");
         const cartDrawer = document.getElementById("cartDrawer");
-        const openCartBtn = document.getElementById("openCart");
-        const closeCartBtn = document.getElementById("closeCart");
-        const cartItemsDiv = document.getElementById("cartItems");
-        const cartTotalSpan = document.getElementById("cartTotal");
-        const cartCountSpan = document.getElementById("cartCount");
         const userIdDisplay = document.getElementById("userIdDisplay");
         const loadingIndicator = document.getElementById("loadingIndicator");
         const adminProductList = document.getElementById("adminProductList");
         const adminLoading = document.getElementById("adminLoading");
         const adminOrderList = document.getElementById("adminOrderList");
         const orderLoading = document.getElementById("orderLoading");
+        const cartTotalSpan = document.getElementById("cartTotal");
+        const cartCountSpan = document.getElementById("cartCount");
 
 
         // --- Data Variables ---
@@ -289,7 +283,6 @@
         
         // --- VIEW SWITCHING LOGIC ---
         function switchView(viewName) {
-            // Remove unnecessary class logic as admin link is removed from nav
             if (viewName === 'shop') {
                 shopView.classList.remove('hidden');
                 adminView.classList.add('hidden');
@@ -306,7 +299,6 @@
             
             if (viewParam === 'admin') {
                 switchView('admin');
-                // Optional: show a message that admin access is enabled via URL
                 console.log("Admin View enabled via URL parameter: '?view=admin'.");
             } else {
                 switchView('shop');
@@ -315,60 +307,6 @@
 
         // Start on the appropriate view based on URL
         initializeView(); 
-
-
-               // --- FIREBASE INITIALIZATION & AUTH (Optimized) ---
-        // New structure: Force initial sign-in (token or anonymous) to complete, 
-        // then finalize the state and start data listeners.
-        
-        async function initFirebase() {
-            if (!firebaseConfig) {
-                 console.error("Firebase configuration is missing. Cannot initialize database.");
-                 isAuthReady = true;
-                 loadingIndicator.textContent = "Database not configured. Using mock data only.";
-                 return;
-            }
-
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            
-            // 1. FORCE INITIAL SIGN-IN (Blocking Call)
-            try {
-                if (initialAuthToken) {
-                    // Attempt custom token sign-in and WAIT for it to complete
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("Initial sign-in: Custom token successful.");
-                } else {
-                    // Fallback to anonymous sign-in and WAIT for it to complete
-                    await signInAnonymously(auth);
-                    console.log("Initial sign-in: Anonymous successful.");
-                }
-            } catch (e) {
-                console.error("Initial sign-in attempt failed. App may be unstable:", e.message);
-                // The onAuthStateChanged listener below will still try to pick up the state if it eventually resolves.
-            }
-
-            // 2. SET UP FINAL STATE LISTENER
-            // This listener will capture the final userId and only then initialize data.
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userId = user.uid;
-                } else {
-                    // Safeguard if no user is present
-                    userId = 'unauthenticated-fallback'; 
-                }
-                
-                // Finalize authentication state and start the app data flow
-                userIdDisplay.textContent = userId;
-                isAuthReady = true;
-                initializeDataListeners();
-                console.log("Auth State Finalized. User ID:", userId);
-            });
-        }
-        
-        // Start the optimized initialization process immediately.
-        initFirebase();
 
 
         // --- FIRESTORE PATHS ---
@@ -441,7 +379,6 @@
                 orders = snapshot.docs.map(doc => {
                     const data = doc.data();
                     // Parse the JSON stringified items back into an array
-                    // Check if items is a string before parsing
                     data.items = typeof data.items === 'string' ? JSON.parse(data.items) : []; 
                     return { id: doc.id, ...data };
                 });
@@ -461,16 +398,60 @@
                 console.error("Error fetching cart:", error);
             });
         }
+        
+        // --- FIREBASE INITIALIZATION & AUTH (Optimized) ---
+
+        async function initFirebase() {
+            if (!firebaseConfig) {
+                 console.error("Firebase configuration is missing. Cannot initialize database.");
+                 isAuthReady = true;
+                 loadingIndicator.textContent = "Database not configured. Using mock data only.";
+                 return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            
+            // 1. FORCE INITIAL SIGN-IN (Blocking Call)
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Initial sign-in: Custom token successful.");
+                } else {
+                    await signInAnonymously(auth);
+                    console.log("Initial sign-in: Anonymous successful.");
+                }
+            } catch (e) {
+                console.error("Initial sign-in attempt failed, falling back to listener:", e.message);
+            }
+
+            // 2. SET UP FINAL STATE LISTENER
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                } else {
+                    userId = 'unauthenticated-fallback'; 
+                }
+                
+                // Finalize authentication state
+                userIdDisplay.textContent = userId;
+                isAuthReady = true;
+                initializeDataListeners();
+                console.log("Auth State Finalized. User ID:", userId);
+            });
+        }
+        
+        // Start the optimized initialization process immediately.
+        initFirebase();
 
 
         // --- PRODUCT RENDERING & FILTERING ---
 
         function getProductImage(product) {
-            // Priority 1: Base64 data (from admin upload)
             if (product.imageBase64) {
                 return product.imageBase64;
             }
-            // Fallback
             return "https://placehold.co/300x250/000/fff?text=No+Image";
         }
 
@@ -493,9 +474,7 @@
             productsContainer.innerHTML = "";
 
             const filtered = products.filter(p => {
-                // Check if product type exists, trim it, and compare
                 const productTypeTrimmed = p.type ? p.type.trim() : '';
-                // Check if product size exists, trim it, and compare
                 const productSizeTrimmed = p.size ? p.size.trim() : '';
                 
                 const matchesType = typeFilter === "all" || productTypeTrimmed === typeFilter;
@@ -514,8 +493,6 @@
                 productElement.className = "product bg-secondary rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1 overflow-hidden group border border-gray-100";
                 
                 const imageUrl = getProductImage(p);
-
-                // Ensure price is a number for the inline click event
                 const safePrice = p.price && !isNaN(p.price) ? p.price : 0; 
 
                 productElement.innerHTML = `
@@ -653,8 +630,6 @@
 
         // --- ADMIN FIREBASE FUNCTIONS ---
 
-        // --- ADMIN FIREBASE FUNCTIONS ---
-
         productForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             
@@ -701,6 +676,26 @@
             }
         });
 
+
+        window.deleteProductFirestore = async (productId, productName) => {
+            if (!isAuthReady || !userId) return;
+
+            const confirmed = await showModal(
+                "Confirm Deletion",
+                `Are you sure you want to permanently delete "${productName}"?`,
+                true
+            );
+
+            if (confirmed) {
+                try {
+                    await deleteDoc(doc(db, productCollectionPath, productId));
+                    showModal("Deleted", `Product "${productName}" has been removed.`);
+                } catch (error) {
+                    console.error("Error deleting product:", error);
+                    showModal("Error", "Failed to delete product. Check console for details.");
+                }
+            }
+        };
 
 
         // --- CART FIREBASE FUNCTIONS ---
@@ -797,6 +792,7 @@
         };
 
         function updateCartDisplay() {
+            // ... (cart update logic remains the same) ...
             cartItemsDiv.innerHTML = "";
             let total = 0;
             
@@ -919,4 +915,5 @@
     </script>
 </body>
 </html>
+
 
