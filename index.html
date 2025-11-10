@@ -36,6 +36,20 @@
             background: #555;
         }
         html { scroll-behavior: smooth; }
+        
+        /* Ensure the body and html don't cause horizontal overflow */
+        body { overflow-x: hidden; }
+
+        /* Mobile full-width cart drawer */
+        #cartDrawer {
+            width: 100%; /* Default to full width on mobile */
+        }
+        @media (min-width: 768px) { /* On medium screens and up */
+            #cartDrawer {
+                width: 400px;
+            }
+        }
+
     </style>
 </head>
 <body class="bg-secondary text-primary font-sans">
@@ -44,18 +58,16 @@
     <header class="sticky top-0 z-50 bg-primary text-secondary shadow-lg border-b border-gray-700">
         <div class="flex items-center justify-between p-3 md:p-4 max-w-7xl mx-auto">
             <!-- LOGO INTEGRATION -->
-            <img src="<img src="https://placehold.co/160x50/000000/ffffff?text=DABAN%20%7C%20Shop"
-                alt="Daban Brand Logo" 
+            <img src="https://placehold.co/160x50/000000/ffffff?text=DABAN%20%7C%20Studio" 
+                 alt="Daban Brand Logo" 
                  class="h-8 md:h-10 cursor-pointer object-contain"
                  onclick="switchView('shop')"
             />
             
             <nav class="flex items-center space-x-4 md:space-x-8">
-                <!-- SHOP Button - remains for clarity but is primarily controlled by URL -->
+                <!-- SHOP Button -->
                 <button onclick="switchView('shop')" id="navShop" 
-                    class="font-medium hover:text-gray-400 transition nav-link text-secondary">Shop</button>
-                
-                <!-- ADMIN BUTTON REMOVED for separation -->
+                    class="font-medium hover:text-gray-400 transition nav-link text-secondary text-sm md:text-base">Shop</button>
                 
                 <button id="openCart" class="px-3 py-1 text-sm font-medium border border-secondary rounded-lg hover:bg-secondary hover:text-primary transition">
                     Cart (<span id="cartCount">0</span>)
@@ -76,27 +88,29 @@
     -->
     <div id="shopView" class="view hidden">
         <!-- HERO SECTION -->
-        <section class="bg-accent text-primary text-center py-16 md:py-24">
+        <section class="bg-accent text-primary text-center py-16 md:py-24 px-4">
             <h2 class="text-4xl md:text-6xl font-extrabold mb-3">Monochrome Style. Timeless Quality.</h2>
             <p class="text-lg md:text-xl font-light">Minimal design. Premium comfort. Shop Daban Apparel (GH₵).</p>
         </section>
 
-        <!-- FILTER SECTION -->
+        <!-- FILTER SECTION - Enhanced for mobile stacking -->
         <div class="flex flex-col md:flex-row justify-center items-center flex-wrap gap-4 py-6 px-4 bg-secondary border-b border-gray-200">
-            <div class="flex items-center space-x-2">
-                <label for="filterType" class="text-sm font-medium">Filter by Type:</label>
-                <select id="filterType" class="p-2 border border-primary rounded-lg bg-secondary text-sm"></select>
+            <div class="w-full md:w-auto flex items-center justify-center space-x-2">
+                <label for="filterType" class="text-sm font-medium">Type:</label>
+                <select id="filterType" class="flex-1 p-2 border border-primary rounded-lg bg-secondary text-sm"></select>
             </div>
-            <div class="flex items-center space-x-2">
-                <label for="filterSize" class="text-sm font-medium">Filter by Size:</label>
-                <select id="filterSize" class="p-2 border border-primary rounded-lg bg-secondary text-sm"></select>
+            <div class="w-full md:w-auto flex items-center justify-center space-x-2">
+                <label for="filterSize" class="text-sm font-medium">Size:</label>
+                <select id="filterSize" class="flex-1 p-2 border border-primary rounded-lg bg-secondary text-sm"></select>
             </div>
         </div>
 
         <!-- PRODUCT GRID SECTION -->
-        <section class="max-w-7xl mx-auto p-6 md:p-10">
-            <h2 class="text-3xl font-semibold mb-8 border-b pb-2 text-center md:text-left">Shop Collection</h2>
-            <div id="productsContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <section class="max-w-7xl mx-auto p-4 md:p-10">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-6 md:mb-8 border-b pb-2 text-center md:text-left">Shop Collection</h2>
+            <!-- Grid setup is already 2 columns on mobile, which is good for tapping, 
+                 but we ensure good gap/padding -->
+            <div id="productsContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                 <div id="loadingIndicator" class="col-span-full text-center p-10 text-gray-500">
                     Loading products...
                 </div>
@@ -110,21 +124,22 @@
         =========================================================
     -->
     <div id="adminView" class="view hidden">
-        <section class="bg-accent border-b border-primary py-10 px-6">
+        <section class="bg-accent border-b border-primary py-8 px-4">
             <div class="max-w-4xl mx-auto text-center">
-                <h3 class="text-4xl font-extrabold mb-3">Inventory & Order Management</h3>
-                <p class="text-gray-600">Secure access for Daban staff only.</p>
+                <h3 class="text-3xl md:text-4xl font-extrabold mb-3">Inventory & Order Management</h3>
+                <p class="text-gray-600 text-sm md:text-base">Secure access for Daban staff only.</p>
             </div>
         </section>
 
-        <section class="mt-8 py-10 px-6">
-            <div class="max-w-4xl mx-auto space-y-12">
+        <section class="mt-8 py-8 px-4">
+            <div class="max-w-4xl mx-auto space-y-10 md:space-y-12">
                 
                 <!-- 1. PRODUCT MANAGEMENT -->
                 <div>
-                    <h3 class="text-2xl font-bold mb-6 text-center">Manage Products</h3>
+                    <h3 class="text-xl md:text-2xl font-bold mb-5 text-center">Manage Products</h3>
                     <div class="bg-accent p-6 md:p-8 rounded-xl shadow-lg border border-primary">
-                        <h4 class="text-xl font-semibold mb-4 border-b pb-2">Add New Product</h4>
+                        <h4 class="text-lg md:text-xl font-semibold mb-4 border-b pb-2">Add New Product</h4>
+                        <!-- Form grid maintains single column on mobile -->
                         <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input type="text" id="productName" placeholder="Product Name" required
                                 class="p-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary" />
@@ -135,12 +150,12 @@
                             <input type="number" id="productPrice" step="0.01" placeholder="Price (GH₵)" required min="0.01"
                                 class="p-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary" />
                             
-                            <!-- FILE INPUT -->
+                            <!-- FILE INPUT - MODIFIED FOR MOBILE CAPTURE -->
                             <div class="md:col-span-2 space-y-2">
                                 <label for="productImageFile" class="block text-sm font-medium text-gray-700">Product Image (File Upload - Max 500KB)</label>
-                                <input type="Added capture="environment" to prompt device camera/gallery --> <input type="file" id="productImageFile" accept="image/*" capture="environment" required
-class="w-full text-sm text-gray-500
-file:mr-4 file:py-2 file:px-4 file: rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-secondary hover: file:bg-gray-700"
+                                <input type="file" id="productImageFile" accept="image/*" capture="environment" required
+                                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-secondary hover:file:bg-gray-700" />
+                            </div>
 
                             <div id="imgPreview" class="md:col-span-2 text-center min-h-[50px] flex justify-center items-center"></div>
                             
@@ -154,7 +169,7 @@ file:mr-4 file:py-2 file:px-4 file: rounded-full file:border-0 file:text-sm file
                         </form>
                     </div>
 
-                     <h4 class="text-xl font-semibold mt-8 mb-4 border-b pb-2">Existing Products</h4>
+                     <h4 class="text-lg md:text-xl font-semibold mt-8 mb-4 border-b pb-2">Existing Products</h4>
                     <div id="adminProductList" class="space-y-3">
                         <p id="adminLoading" class="text-center p-4 text-gray-500">Loading products...</p>
                         <!-- Existing product list will be injected here -->
@@ -163,8 +178,8 @@ file:mr-4 file:py-2 file:px-4 file: rounded-full file:border-0 file:text-sm file
 
                 <!-- 2. ORDER MANAGEMENT -->
                 <div>
-                    <h3 class="text-2xl font-bold mb-6 text-center">Customer Order History</h3>
-                    <h4 class="text-xl font-semibold mb-4 border-b pb-2">All Orders</h4>
+                    <h3 class="text-xl md:text-2xl font-bold mb-6 text-center">Customer Order History</h3>
+                    <h4 class="text-lg md:text-xl font-semibold mb-4 border-b pb-2">All Orders</h4>
                     <div id="adminOrderList" class="space-y-4">
                         <p id="orderLoading" class="text-center p-4 text-gray-500">Loading orders...</p>
                         <!-- Order list will be injected here -->
@@ -175,19 +190,19 @@ file:mr-4 file:py-2 file:px-4 file: rounded-full file:border-0 file:text-sm file
         </section>
     </div>
 
-    <!-- FOOTER -->
+    <!-- FOOTER - Adjusted for better mobile spacing -->
     <footer class="bg-primary text-secondary p-6 mt-24 md:p-8">
-    <div class="text-center max-w-7xl mx-auto text-sm md:text-base">
-        <p>&copy; 2025 Daban Apparel — Modern, Minimal, Monochrome.</p>
-    </div>
-</footer>
+        <div class="text-center max-w-7xl mx-auto text-sm md:text-base">
+            <p>&copy; 2025 Daban Apparel — Modern, Minimal, Monochrome.</p>
+        </div>
+    </footer>
 
-
-    <!-- CART DRAWER MODAL -->
-    <div id="cartDrawer" class="fixed right-0 top-0 w-full md:w-[400px] h-full bg-secondary shadow-2xl transform translate-x-full transition-transform duration-300 z-[1001] flex flex-col">
+    <!-- CART DRAWER MODAL - WIDER ON MOBILE -->
+    <!-- The width is controlled by the style block in the head for better mobile control -->
+    <div id="cartDrawer" class="fixed right-0 top-0 h-full bg-secondary shadow-2xl transform translate-x-full transition-transform duration-300 z-[1001] flex flex-col">
         <div class="cart-header bg-primary text-secondary p-4 flex justify-between items-center">
             <h3 class="text-xl font-bold">Your Cart</h3>
-            <button id="closeCart" class="text-2xl hover:text-gray-400 transition">×</button>
+            <button id="closeCart" class="text-3xl hover:text-gray-400 transition" aria-label="Close Cart">×</button>
         </div>
         <div id="cartItems" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
             <!-- Cart items here -->
@@ -808,23 +823,24 @@ file:mr-4 file:py-2 file:px-4 file: rounded-full file:border-0 file:text-sm file
                         <span class="text-sm text-gray-600">GH₵${safePrice.toFixed(2)} / unit</span>
                     </div>
                     
-                    <div class="flex items-center border border-gray-300 rounded-md">
+                    <!-- Ensure buttons are large enough for touch targets -->
+                    <div class="flex items-center border border-gray-300 rounded-lg">
                         <button onclick="window.updateCartQuantity('${item.id}', ${safeQty - 1}, '${item.name}')" 
-                                class="w-8 h-8 flex items-center justify-center text-lg hover:bg-gray-100 rounded-l-md transition"
+                                class="w-10 h-10 flex items-center justify-center text-xl hover:bg-gray-100 rounded-l-lg transition"
                                 title="Decrease Quantity">
                             -
                         </button>
-                        <span class="px-3 text-sm font-medium">${safeQty}</span>
+                        <span class="px-3 text-base font-medium">${safeQty}</span>
                         <button onclick="window.updateCartQuantity('${item.id}', ${safeQty + 1}, '${item.name}')" 
-                                class="w-8 h-8 flex items-center justify-center text-lg hover:bg-gray-100 rounded-r-md transition"
+                                class="w-10 h-10 flex items-center justify-center text-xl hover:bg-gray-100 rounded-r-lg transition"
                                 title="Increase Quantity">
                             +
                         </button>
                     </div>
 
                     <button onclick="window.removeFromCartFirestore('${item.id}', '${item.name}')" 
-                            class="text-red-500 hover:text-red-700 transition ml-2 flex-shrink-0" title="Remove all units">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            class="text-red-500 hover:text-red-700 transition ml-2 flex-shrink-0 p-2" title="Remove all units">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 10-2 0v6a1 1 0 102 0V8z" clip-rule="evenodd" />
                         </svg>
                     </button>
