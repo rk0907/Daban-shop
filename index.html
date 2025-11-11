@@ -163,7 +163,8 @@
                             <input type="hidden" id="productImageBase64" />
 
                             <button type="submit"
-                                class="md:col-span-2 bg-primary text-secondary p-3 rounded-md font-semibold hover:bg-gray-700 transition duration-200">
+                                class="md:col-span-2 bg-primary text-secondary p-3 rounded-md font-semibold hover:bg-gray-700 transition duration-200"
+                                id="adminSubmitBtn">
                                 Add Product
                             </button>
                         </form>
@@ -242,7 +243,7 @@
         import { getFirestore, collection, doc, onSnapshot, addDoc, deleteDoc, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        setLogLevel('Debug');
+        setLogLevel('Debug'); // Keep debug logs enabled for troubleshooting the auth flow
 
         // --- GLOBAL SETUP ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -271,6 +272,9 @@
         const orderLoading = document.getElementById("orderLoading");
         const cartTotalSpan = document.getElementById("cartTotal");
         const cartCountSpan = document.getElementById("cartCount");
+        const cartItemsDiv = document.getElementById("cartItems"); // Added missing definition
+        const openCartBtn = document.getElementById("openCart"); // Added missing definition
+        const closeCartBtn = document.getElementById("closeCart"); // Added missing definition
 
 
         // --- Data Variables ---
@@ -310,8 +314,10 @@
 
 
         // --- FIRESTORE PATHS ---
+        // Products and Orders are stored in the public space so the shop view can read them without special authentication
         const productCollectionPath = `artifacts/${appId}/public/data/products`;
         const orderCollectionPath = `artifacts/${appId}/public/data/orders`; 
+        // Cart is private, scoped to the specific user/browser instance
         const getCartCollectionPath = (uid) => `artifacts/${appId}/users/${uid}/cart`;
 
 
@@ -358,7 +364,7 @@
 
         function initializeDataListeners() {
             // CRITICAL GUARD: Only run if Firestore DB and User ID are set
-            if (!db || !userId) {
+            if (!db || !userId || !isAuthReady) {
                 console.error("Data Listener blocked: DB or User ID not ready.");
                 return;
             }
@@ -395,6 +401,7 @@
 
 
             // CART Listener (Private Data)
+            // This is scoped to the specific user's ID
             cartSnapshotUnsubscribe = onSnapshot(collection(db, getCartCollectionPath(userId)), (snapshot) => {
                 cart = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 updateCartDisplay();
@@ -417,7 +424,23 @@
             db = getFirestore(app);
             auth = getAuth(app);
             
-            // 1. FORCE INITIAL SIGN-IN (Blocking Call)
+            // 1. SET UP FINAL STATE LISTENER to run once auth is resolved
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                } else {
+                    // Fallback for unauthenticated users (for the cart/shop view)
+                    userId = crypto.randomUUID(); 
+                }
+                
+                // Finalize authentication state
+                userIdDisplay.textContent = userId;
+                isAuthReady = true;
+                initializeDataListeners();
+                console.log("Auth State Finalized. User ID:", userId);
+            });
+
+            // 2. FORCE INITIAL SIGN-IN (Blocking Call for the listener to pick up)
             try {
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
@@ -427,23 +450,11 @@
                     console.log("Initial sign-in: Anonymous successful.");
                 }
             } catch (e) {
-                console.error("Initial sign-in attempt failed, falling back to listener:", e.message);
+                console.error("Initial sign-in attempt failed:", e.message);
+                // The onAuthStateChanged listener will still fire, potentially with an anonymous user, 
+                // so we don't need a hard return here.
             }
 
-            // 2. SET UP FINAL STATE LISTENER
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userId = user.uid;
-                } else {
-                    userId = 'unauthenticated-fallback'; 
-                }
-                
-                // Finalize authentication state
-                userIdDisplay.textContent = userId;
-                isAuthReady = true;
-                initializeDataListeners();
-                console.log("Auth State Finalized. User ID:", userId);
-            });
         }
         
         // Start the optimized initialization process immediately.
@@ -453,6 +464,7 @@
         // --- PRODUCT RENDERING & FILTERING ---
 
         function getProductImage(product) {
+            // Your existing logic uses imageBase64, which is preserved.
             if (product.imageBase64) {
                 return product.imageBase64;
             }
@@ -632,17 +644,20 @@
         });
 
 
-        // --- ADMIN FIREBASE FUNCTIONS ---
+        // --- ADMIN FIREBASE FUNCTIONS (Adjusted for Robustness) ---
 
         productForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             
             // CRITICAL CHECK: Ensure authentication is complete
             if (!isAuthReady || !userId) {
-                showModal("Error", "Authentication is not ready. Please wait a moment.");
-                return; // Stop execution immediately if not ready
+                showModal("Error", "Authentication is not ready. Please wait for 'Authenticating...' to resolve.");
+                return; 
             }
 
+            const submitButton = document.getElementById('adminSubmitBtn');
+            const originalText = submitButton.textContent;
+            
             const name = productForm.productName.value.trim();
             const type = productForm.productType.value.trim();
             const size = productForm.productSize.value.trim();
@@ -658,6 +673,10 @@
             }
             
             try {
+                // VISUAL FEEDBACK: Disable button and show loading state
+                submitButton.disabled = true;
+                submitButton.textContent = "Adding Product..."; 
+
                 const newProduct = { 
                     name, 
                     type, 
@@ -667,6 +686,7 @@
                     createdAt: new Date().toISOString() 
                 };
                 
+                // This is where the swift, token-based upload happens
                 await addDoc(collection(db, productCollectionPath), newProduct);
                 
                 // Reset form and preview
@@ -677,6 +697,10 @@
             } catch (error) {
                 console.error("Error adding product:", error);
                 showModal("Error", "Failed to add product. Check console for details.");
+            } finally {
+                // Restore button state regardless of success or failure
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
             }
         });
 
@@ -918,5 +942,4 @@
     </script>
 </body>
 </html>
-
 
