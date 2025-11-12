@@ -283,7 +283,7 @@ function renderProducts() {
 
     const imgSrc = p.image || placeholderForCategory(p.category);
     card.innerHTML = `
-      <img src="${imgSrc}" alt="${escapeHtml(p.name)}" class="product-img" onerror="this.onerror=null;this.src='${placeholderForCategory(p.category)}'"/>
+            <img src="${imgSrc}" alt="${escapeHtml(p.name)}" class="product-img cursor-pointer" onclick="viewProduct('${p.id}')" onerror="this.onerror=null;this.src='${placeholderForCategory(p.category)}'"/>
       <div class="p-4">
         <h3 class="font-semibold text-lg">${escapeHtml(p.name)}</h3>
         <p class="text-sm muted">${escapeHtml(p.category)} • ${escapeHtml(p.color||'')}</p>
