@@ -3,308 +3,148 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DABAN | Different</title>
+<title>DABAN | Modern Apparel</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                primary: '#000000',
+                secondary: '#FFFFFF',
+                accent: '#FFD700', /* gold */
+            },
+            fontFamily: {
+                sans: ['Inter', 'Helvetica Neue', 'sans-serif'],
+            },
+        }
+    }
+}
+</script>
 <style>
-  body { margin:0; font-family: 'Inter', sans-serif; background:white; color:black;}
-  .gold { color:gold; }
-  header, footer { background:black; color:white; }
-  .view { display:none; }
-  .view.active { display:block; }
-  .product img { width:100%; height:200px; object-fit:cover; border-radius:8px; }
-  .cart-item img { width:50px; height:50px; object-fit:cover; border-radius:4px; }
-  input, select, button, textarea { font-family:inherit; }
-  .hidden { display:none; }
+body {scroll-behavior: smooth; overflow-x: hidden;}
+.custom-scroll::-webkit-scrollbar {width: 6px;}
+.custom-scroll::-webkit-scrollbar-thumb {background: #888; border-radius: 3px;}
+.custom-scroll::-webkit-scrollbar-thumb:hover {background: #555;}
+#cartDrawer {width: 100%;}
+@media (min-width: 768px){#cartDrawer{width:400px;}}
 </style>
 </head>
-<body>
+<body class="bg-secondary text-primary font-sans">
 
 <!-- HEADER -->
-<header class="flex justify-between items-center p-4">
-  <h1 class="text-2xl font-bold gold cursor-pointer" onclick="switchView('shop')">DABAN</h1>
-  <div>
-    <button onclick="switchView('shop')" class="mr-2">Shop</button>
-    <button onclick="switchView('cart')">Cart (<span id="cartCount">0</span>)</button>
-    <button onclick="showAdminLogin()">Admin</button>
-  </div>
+<header class="sticky top-0 z-50 bg-primary text-secondary shadow-md">
+<div class="flex items-center justify-between p-4 max-w-7xl mx-auto">
+    <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('shop')">
+        <img src="https://placehold.co/160x50/000/ffd700?text=DABAN" alt="DABAN Logo" class="h-10 object-contain"/>
+        <span class="font-bold text-xl">DABAN</span>
+    </div>
+    <nav class="flex items-center space-x-4">
+        <button onclick="switchView('shop')" class="hover:text-accent font-medium">Shop</button>
+        <button onclick="switchView('admin')" class="hover:text-accent font-medium">Admin</button>
+        <button id="openCart" class="px-3 py-1 border border-secondary rounded-lg hover:bg-accent hover:text-primary transition">Cart (<span id="cartCount">0</span>)</button>
+    </nav>
+</div>
 </header>
 
+<!-- USER ID DISPLAY -->
+<div class="bg-accent p-2 text-xs text-center border-b border-primary">
+    Current User ID: <span id="userIdDisplay" class="font-mono text-primary break-all">Authenticating...</span>
+</div>
+
 <!-- SHOP VIEW -->
-<div id="shopView" class="view active p-4">
-  <h2 class="text-xl mb-4">Shop Collection</h2>
-  <div class="flex gap-2 mb-4">
-    <select id="filterCategory">
-      <option value="all">All Categories</option>
-      <option value="Shoes">Shoes</option>
-      <option value="Dresses">Dresses</option>
-      <option value="Shirts">Shirts</option>
-      <option value="Bags">Bags</option>
-    </select>
-  </div>
-  <div id="productsContainer" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+<div id="shopView" class="view hidden">
+
+<section class="text-center py-16 px-4 bg-secondary">
+<h2 class="text-5xl font-extrabold mb-3">Monochrome & Gold. Timeless Style.</h2>
+<p class="text-lg font-light mb-8">Shop DABAN Apparel - Shoes, Dresses, Shirts, Bags (GH₵)</p>
+
+<!-- Filters -->
+<div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+<div class="flex items-center space-x-2"><label>Type:</label><select id="filterType" class="p-2 border border-primary rounded"></select></div>
+<div class="flex items-center space-x-2"><label>Size:</label><select id="filterSize" class="p-2 border border-primary rounded"></select></div>
 </div>
 
-<!-- CART VIEW -->
-<div id="cartView" class="view p-4">
-  <h2 class="text-xl mb-4 gold">Your Cart</h2>
-  <button onclick="switchView('shop')" class="mb-4 border p-2 rounded">Back to Shop</button>
-  <div id="cartContainer" class="mb-4"></div>
-  <div class="text-lg font-bold mb-4">Total: GH₵<span id="cartTotal">0.00</span></div>
-  <button onclick="checkout()" class="bg-gold text-black p-2 rounded w-full">Checkout</button>
+<!-- Product Grid -->
+<div id="productsContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+<div id="loadingIndicator" class="col-span-full text-center p-10 text-gray-500">Loading products...</div>
 </div>
-
-<!-- ADMIN LOGIN MODAL -->
-<div id="adminLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-  <div class="bg-white p-6 rounded-lg w-full max-w-sm">
-    <h3 class="text-lg font-bold mb-4">Admin Login</h3>
-    <input type="password" id="adminPassword" placeholder="Password" class="w-full p-2 border mb-4 rounded"/>
-    <button onclick="adminLogin()" class="w-full bg-black text-gold p-2 rounded">Login</button>
-    <button onclick="closeAdminLogin()" class="w-full mt-2 border p-2 rounded">Cancel</button>
-  </div>
+</section>
 </div>
 
 <!-- ADMIN VIEW -->
-<div id="adminView" class="view p-4">
-  <h2 class="text-xl font-bold mb-4 gold">Admin Panel</h2>
-  <button onclick="switchView('shop')" class="mb-4 border p-2 rounded">Back to Shop</button>
-  
-  <!-- Add Product Form -->
-  <div class="bg-black text-white p-4 rounded-lg mb-6">
-    <h3 class="font-bold mb-2">Add New Product</h3>
-    <input type="text" id="productName" placeholder="Product Name" class="w-full p-2 mb-2 rounded text-black"/>
-    <textarea id="productDescription" placeholder="Description" class="w-full p-2 mb-2 rounded text-black"></textarea>
-    <input type="number" id="productPrice" placeholder="Price (GH₵)" class="w-full p-2 mb-2 rounded text-black"/>
-    <select id="productCategory" class="w-full p-2 mb-2 rounded text-black">
-      <option value="Shoes">Shoes</option>
-      <option value="Dresses">Dresses</option>
-      <option value="Shirts">Shirts</option>
-      <option value="Bags">Bags</option>
-    </select>
-    <select id="imageSource" class="w-full p-2 mb-2 rounded text-black">
-      <option value="file">Upload from files/gallery</option>
-      <option value="camera">Use camera</option>
-    </select>
-    <input type="file" id="productImageFile" accept="image/*" class="w-full p-2 mb-2 rounded text-black"/>
-    <button onclick="captureImage()" id="cameraBtn" class="w-full bg-gold text-black p-2 mb-2 rounded hidden">Open Camera</button>
-    <div id="imgPreview" class="mb-2"></div>
-    <button onclick="addProduct()" class="w-full bg-gold text-black p-2 rounded">Add Product</button>
-  </div>
+<div id="adminView" class="view hidden">
 
-  <h3 class="font-bold mb-2">Existing Products</h3>
-  <div id="adminProducts"></div>
+<section class="max-w-4xl mx-auto py-12 px-4">
+<h2 class="text-3xl font-bold text-center mb-6">Admin Product Management</h2>
+
+<!-- Login -->
+<div id="adminLogin" class="mb-8">
+<input type="password" id="adminPassword" placeholder="Enter Admin Password" class="w-full p-3 border rounded mb-2"/>
+<button id="adminLoginBtn" class="w-full bg-primary text-accent p-3 rounded hover:bg-accent hover:text-primary transition">Login</button>
+<p id="adminLoginMessage" class="text-red-600 text-sm mt-2 text-center"></p>
 </div>
 
+<!-- Product Form -->
+<div id="adminPanel" class="hidden bg-white p-6 rounded shadow space-y-6">
+<h3 class="font-bold text-xl">Add New Product</h3>
+<form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<input type="text" id="productName" placeholder="Product Name" required class="p-3 border rounded"/>
+<select id="productType" required class="p-3 border rounded">
+<option value="">Select Type</option>
+<option value="Shoes">Shoes</option>
+<option value="Dress">Dress</option>
+<option value="Shirt">Shirt</option>
+<option value="Bag">Bag</option>
+</select>
+<input type="text" id="productSize" placeholder="Size (S/M/L/One Size)" required class="p-3 border rounded"/>
+<input type="number" id="productPrice" placeholder="Price (GH₵)" required class="p-3 border rounded"/>
+<div class="md:col-span-2 space-y-2">
+<label>Upload Image (Camera/Gallery/File)</label>
+<input type="file" id="productImageFile" accept="image/*" capture="environment" class="w-full"/>
+<div id="imgPreview" class="min-h-[50px] flex justify-center items-center mt-2"></div>
+<input type="hidden" id="productImageBase64"/>
+</div>
+<button type="submit" class="md:col-span-2 bg-primary text-accent p-3 rounded hover:bg-accent hover:text-primary transition">Add Product</button>
+</form>
+
+<h3 class="font-bold text-xl mt-8">Existing Products</h3>
+<div id="adminProductList" class="space-y-3"></div>
+</div>
+</section>
+</div>
+
+<!-- CART DRAWER -->
+<div id="cartDrawer" class="fixed right-0 top-0 h-full bg-secondary shadow-2xl transform translate-x-full transition-transform duration-300 z-[1001] flex flex-col">
+<div class="cart-header bg-primary text-accent p-4 flex justify-between items-center">
+<h3 class="text-xl font-bold">Your Cart</h3>
+<button id="closeCart" class="text-3xl hover:text-gray-400 transition">×</button>
+</div>
+<div id="cartItems" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4"></div>
+<div class="cart-footer border-t border-primary p-4 space-y-3">
+<div class="flex justify-between font-bold text-lg"><span>Total:</span><span>GH₵<span id="cartTotal">0.00</span></span></div>
+<button id="checkoutBtn" class="w-full bg-primary text-accent p-3 rounded hover:bg-accent hover:text-primary transition">Proceed to Checkout</button>
+</div>
+</div>
+
+<!-- SCRIPT (simplified example for UI, admin login, and product preview) -->
 <script>
-let products = [];
-let cart = [];
-let isAdmin = false;
+const shopView=document.getElementById('shopView'),adminView=document.getElementById('adminView'),adminPanel=document.getElementById('adminPanel'),adminLogin=document.getElementById('adminLogin');
+const adminPasswordInput=document.getElementById('adminPassword'),adminLoginBtn=document.getElementById('adminLoginBtn'),adminLoginMessage=document.getElementById('adminLoginMessage');
+const productImageFile=document.getElementById('productImageFile'),imgPreview=document.getElementById('imgPreview'),productImageBase64=document.getElementById('productImageBase64');
 
-// SWITCH VIEW
-function switchView(view){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById(view+'View')?.classList.add('active');
-  if(view==='cart') renderCart();
-}
+function switchView(view){shopView.classList.add('hidden');adminView.classList.add('hidden');if(view==='shop'){shopView.classList.remove('hidden');}else{adminView.classList.remove('hidden');}}
+switchView('shop');
 
-// ADMIN LOGIN
-function showAdminLogin(){ document.getElementById('adminLoginModal').classList.remove('hidden'); }
-function closeAdminLogin(){ document.getElementById('adminLoginModal').classList.add('hidden'); }
-function adminLogin(){
-  const pass = document.getElementById('adminPassword').value;
-  if(pass==='Daban2025'){
-    isAdmin=true;
-    closeAdminLogin();
-    switchView('admin');
-    renderAdminProducts();
-  } else { alert('Incorrect password'); }
-}
+adminLoginBtn.addEventListener('click',()=>{
+if(adminPasswordInput.value==='Daban2025'){adminPanel.classList.remove('hidden');adminLoginMessage.textContent='';}else{adminLoginMessage.textContent='Incorrect password!';}});
 
-// IMAGE UPLOAD / CAMERA
-const imageSource = document.getElementById('imageSource');
-const fileInput = document.getElementById('productImageFile');
-const cameraBtn = document.getElementById('cameraBtn');
-let currentImage = '';
-
-imageSource.addEventListener('change', ()=>{
-  if(imageSource.value==='camera'){
-    fileInput.classList.add('hidden');
-    cameraBtn.classList.remove('hidden');
-  } else {
-    fileInput.classList.remove('hidden');
-    cameraBtn.classList.add('hidden');
-  }
+productImageFile.addEventListener('change',(e)=>{
+const file=e.target.files[0];if(!file){imgPreview.innerHTML='';productImageBase64.value='';return;}
+const reader=new FileReader();
+reader.onload=(ev)=>{productImageBase64.value=ev.target.result;imgPreview.innerHTML=`<img src="${ev.target.result}" class="w-40 h-40 object-cover rounded"/>`;};
+reader.readAsDataURL(file);
 });
-
-function captureImage(){
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    alert('Camera not supported'); return;
-  }
-  const video = document.createElement('video');
-  video.autoplay=true;
-  video.style.width='100%';
-  const modal = document.createElement('div');
-  modal.className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center';
-  const box = document.createElement('div');
-  box.className='bg-white p-4 rounded';
-  const snapBtn = document.createElement('button');
-  snapBtn.innerText='Capture';
-  snapBtn.className='bg-gold text-black p-2 rounded w-full mt-2';
-  box.appendChild(video);
-  box.appendChild(snapBtn);
-  modal.appendChild(box);
-  document.body.appendChild(modal);
-
-  navigator.mediaDevices.getUserMedia({video:true})
-    .then(stream=>{
-      video.srcObject = stream;
-      snapBtn.onclick=()=>{
-        const canvas=document.createElement('canvas');
-        canvas.width=video.videoWidth;
-        canvas.height=video.videoHeight;
-        canvas.getContext('2d').drawImage(video,0,0);
-        currentImage = canvas.toDataURL('image/png');
-        document.getElementById('imgPreview').innerHTML=`<img src="${currentImage}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;">`;
-        stream.getTracks().forEach(t=>t.stop());
-        document.body.removeChild(modal);
-      }
-    })
-    .catch(()=>alert('Cannot access camera'));
-}
-
-fileInput.addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      currentImage = ev.target.result;
-      document.getElementById('imgPreview').innerHTML=`<img src="${currentImage}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;">`;
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-// ADD PRODUCT
-function addProduct(){
-  const name = document.getElementById('productName').value;
-  const desc = document.getElementById('productDescription').value;
-  const price = parseFloat(document.getElementById('productPrice').value);
-  const cat = document.getElementById('productCategory').value;
-  if(!name || !price || !cat || !currentImage) return alert('All fields are required');
-  const product = {name, desc, price, cat, image:currentImage};
-  products.push(product);
-  localStorage.setItem('dabanProducts', JSON.stringify(products));
-  renderAdminProducts();
-  renderShopProducts();
-  document.getElementById('productName').value='';
-  document.getElementById('productDescription').value='';
-  document.getElementById('productPrice').value='';
-  currentImage=''; document.getElementById('imgPreview').innerHTML='';
-}
-
-// RENDER ADMIN PRODUCTS
-function renderAdminProducts(){
-  const container=document.getElementById('adminProducts');
-  container.innerHTML='';
-  products.forEach((p,i)=>{
-    const div=document.createElement('div');
-    div.className='flex gap-2 mb-2 border p-2 rounded';
-    div.innerHTML=`<img src="${p.image}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">
-      <div class="flex-1">
-        <strong>${p.name}</strong><br>
-        GH₵${p.price.toFixed(2)}<br>
-        ${p.cat}<br>
-        ${p.desc}
-      </div>
-      <button onclick="deleteProduct(${i})" class="bg-red-500 text-white p-1 rounded">Delete</button>`;
-    container.appendChild(div);
-  });
-}
-
-// RENDER SHOP PRODUCTS
-function renderShopProducts(){
-  const filter = document.getElementById('filterCategory').value;
-  const container=document.getElementById('productsContainer');
-  container.innerHTML='';
-  products.forEach((p,i)=>{
-    if(filter==='all' || filter===p.cat){
-      const div=document.createElement('div');
-      div.className='product border p-2 rounded flex flex-col';
-      div.innerHTML=`<img src="${p.image}">
-        <strong>${p.name}</strong>
-        GH₵${p.price.toFixed(2)}
-        ${p.cat}<br>${p.desc}
-        <button onclick="addToCart(${i})" class="bg-gold text-black p-1 mt-2 rounded">Add to Cart</button>`;
-      container.appendChild(div);
-    }
-  });
-}
-
-// DELETE PRODUCT
-function deleteProduct(i){
-  products.splice(i,1);
-  localStorage.setItem('dabanProducts', JSON.stringify(products));
-  renderAdminProducts();
-  renderShopProducts();
-}
-
-// CART FUNCTIONS
-function addToCart(index){
-  cart.push(products[index]);
-  localStorage.setItem('dabanCart', JSON.stringify(cart));
-  updateCartCount();
-  alert('Added to cart');
-}
-
-function renderCart(){
-  const container = document.getElementById('cartContainer');
-  container.innerHTML='';
-  if(cart.length===0) { container.innerHTML='<p>Your cart is empty</p>'; document.getElementById('cartTotal').innerText='0.00'; return; }
-  let total=0;
-  cart.forEach((p,i)=>{
-    total+=p.price;
-    const div=document.createElement('div');
-    div.className='flex gap-2 mb-2 border p-2 rounded items-center';
-    div.innerHTML=`<img src="${p.image}">
-      <div class="flex-1">
-        <strong>${p.name}</strong><br>
-        GH₵${p.price.toFixed(2)}
-      </div>
-      <button onclick="removeFromCart(${i})" class="bg-red-500 text-white p-1 rounded">Remove</button>`;
-    container.appendChild(div);
-  });
-  document.getElementById('cartTotal').innerText=total.toFixed(2);
-}
-
-function removeFromCart(i){
-  cart.splice(i,1);
-  localStorage.setItem('dabanCart', JSON.stringify(cart));
-  renderCart();
-  updateCartCount();
-}
-
-function updateCartCount(){
-  document.getElementById('cartCount').innerText=cart.length;
-}
-
-function checkout(){
-  if(cart.length===0) return alert('Cart is empty');
-  alert(`Checkout successful! Total: GH₵${cart.reduce((sum,p)=>sum+p.price,0).toFixed(2)}`);
-  cart=[]; localStorage.removeItem('dabanCart');
-  renderCart();
-  updateCartCount();
-}
-
-// LOAD DATA FROM LOCALSTORAGE
-window.onload=function(){
-  const storedProducts = localStorage.getItem('dabanProducts');
-  if(storedProducts) products = JSON.parse(storedProducts);
-  const storedCart = localStorage.getItem('dabanCart');
-  if(storedCart) cart = JSON.parse(storedCart);
-  renderShopProducts();
-  updateCartCount();
-}
-
-document.getElementById('filterCategory').addEventListener('change', renderShopProducts);
 </script>
 
 </body>
