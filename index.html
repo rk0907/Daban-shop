@@ -54,8 +54,6 @@ text=DABAN'" />
 gray-700 hover:text-black">Shop</button>
 <button id="navAdmin" onclick="switchView('admin')" class="text-sm text-
 gray-700 hover:text-black">Admin</button>
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 1 of 13
 <button id="openCartBtn" class="relative px-3 py-1 border rounded text-
 sm hover:bg-gray-100">
 Cart (<span id="cartCount">0</span>)
@@ -110,8 +108,6 @@ manage products.</p>
 password" class="border p-2 rounded flex-1" />
 <button class="bg-black text-white px-4 py-2 rounded"
 type="submit">Sign in</button>
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 2 of 13
 <button id="adminSignOutBtn" class="hidden px-4 py-2 border rounded
 text-sm">Sign out</button>
 </form>
@@ -167,8 +163,6 @@ rounded">Clear</button>
 <div class="bg-white border rounded p-6 shadow-sm">
 <h3 class="font-bold text-lg mb-3">Existing products</h3>
 <div id="adminProductList" class="space-y-3"></div>
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 3 of 13
 <p id="adminNoProducts" class="text-gray-500 hidden">No products
 yet.</p>
 </div>
@@ -208,7 +202,7 @@ center justify-center z-60">
 </div>
 <!-- Footer -->
 <footer class="mt-12 py-6 border-t text-center text-sm text-gray-500">
-Â© <span id="year"></span> DABAN â€” Different
+Â© <span id="year"></span> DABAN ” Different
 </footer>
 <script>
 /* =====================
@@ -224,8 +218,6 @@ document.getElementById('year').textContent = new Date().getFullYear();
 function switchView(name) {
 document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
 if (name === 'admin') {
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 4 of 13
 document.getElementById('adminView').classList.remove('hidden'); }
 else { document.getElementById('shopView').classList.remove('hidden'); }
 }
@@ -282,8 +274,6 @@ productsGrid.innerHTML = '';
 const cat = filterCategory.value;
 const q = (filterSearch.value || '').toLowerCase().trim();
 const filtered = products.filter(p => {
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 5 of 13
 if (cat && cat !== 'all' && p.category !== cat) return false;
 if (q && !(p.name.toLowerCase().includes(q) ||
 (p.description||'').toLowerCase().includes(q))) return false;
@@ -340,8 +330,6 @@ Cart behaviour
 const openCartBtn = document.getElementById('openCartBtn');
 const cartDrawer = document.getElementById('cartDrawer');
 const cartItemsDiv = document.getElementById('cartItems');
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 6 of 13
 const cartCount = document.getElementById('cartCount');
 const cartTotalSpan = document.getElementById('cartTotal');
 openCartBtn.addEventListener('click', () => {
@@ -401,8 +389,6 @@ cartTotalSpan.textContent = 'GHâ‚µ' + money(total);
 }
 function changeQty(productId, newQty) {
 const idx = cart.findIndex(c => c.productId === productId);
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 7 of 13
 if (idx === -1) return;
 if (newQty <= 0) cart.splice(idx,1); else cart[idx].qty = newQty;
 saveCart(); renderCart();
@@ -519,8 +505,6 @@ const label = document.createElement('div');
 label.className = 'text-sm text-gray-600';
 label.textContent = 'Bag options: (optional) add strap length or material in
 Color field';
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 9 of 13
 categoryOptions.appendChild(label);
 }
 }
@@ -574,8 +558,6 @@ document.getElementById('adminNoProducts').classList.remove('hidden');
 return;
 }
 document.getElementById('adminNoProducts').classList.add('hidden');
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 10 of 13
 products.forEach(p => {
 const row = document.createElement('div');
 row.className = 'flex items-center justify-between p-3 border rounded';
@@ -634,8 +616,6 @@ showToast('Product deleted');
 Small helpers
 ------------------------- */
 function fileToBase64(file) {
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 11 of 13
 return new Promise((res, rej) => {
 const reader = new FileReader();
 reader.onload = () => res(reader.result);
@@ -694,8 +674,6 @@ window.switchView = switchView;
 window.addToCart = addToCart;
 window.viewProduct = viewProduct;
 window.editProduct = editProduct;
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 12 of 13
 window.deleteProduct = deleteProduct;
 /* set initial UI based on query param */
 (function initFromQuery(){
@@ -719,5 +697,4 @@ renderAdminList();
 </script>
 </body>
 </html>
-blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
-Page 13 of 13
+
