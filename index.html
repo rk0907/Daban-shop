@@ -1,1187 +1,691 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
 <meta charset="utf-8" />
-
-<meta name="viewport" content="width=device-width, initial-scale=1" />
- <title>DABAN — Different</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DABAN â€” Different</title>
 <!-- Tailwind CDN -->
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 <script>
-
 tailwind.config = {
-
 theme: {
-
 extend: {
-
 colors: {
-
 primary: '#000000',
-
 secondary: '#ffffff',
-
-accent: '#D4AF37'
-
-/* gold */
-
+accent: '#D4AF37' /* gold */
 },
-
-fontFamily: { sans:
-
-['Inter', 'Helvetica Neue', 'sans-serif'] }
-
+fontFamily: { sans: ['Inter', 'Helvetica Neue', 'sans-serif'] }
 }
-
 }
-
 };
-
 </script>
-
 <style>
-
 html { scroll-behavior: smooth; }
-
 body { background: white; color: #000; overflow-x: hidden; }
-
 .custom-scroll::-webkit-scrollbar { width: 6px; }
-
 .custom-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius:
-
 3px; }
-
 .product-img { min-height: 180px; max-height: 240px; object-fit: cover;
- width: 100%; }
-
+width: 100%; }
 /* small helpers */
-
 .muted { color: #6b7280; }
-
 </style>
-
 </head>
-
 <body class="font-sans antialiased">
-
 <!-- HEADER -->
-
 <header class="sticky top-0 z-40 bg-white border-b shadow-sm">
-
 <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-
 <div class="flex items-center space-x-3 cursor-pointer"
-
 onclick="switchView('shop')">
-
-<!-- Reverting logo source back to original PDF content's intention -->
-<img src="https://github.com/rk0907/birthday-page/blob/3c4b4bcfe2543c63740a211ce660e4c504bf3090/IMG_0200.jpeg"
-
+<img src=https://github.com/rk0907/birthday-
+page/blob/3c4b4bcfe2543c63740a211ce660e4c504bf3090/IMG_0200.jpeg
 alt="DABAN Logo" class="w-15 h-15 rounded-md object-contain"
-
-onerror="this.onerror=null;this.src='https://placehold.co/40x40/000/fff?text=DABAN'" />
-
+onerror="this.onerror=null;this.src='https://placehold.co/40x40/000/fff?
+text=DABAN'" />
 <div>
-
 <div class="text-lg font-extrabold">DABAN</div>
-
 <div class="text-xs text-gray-500 -mt-1">Different.</div>
-
 </div>
-
 </div>
-
+</div>
 <div class="flex items-center space-x-3">
-
 <button id="navShop" onclick="switchView('shop')" class="text-sm text-
-
 gray-700 hover:text-black">Shop</button>
-
 <button id="navAdmin" onclick="switchView('admin')" class="text-sm text-
-
 gray-700 hover:text-black">Admin</button>
-
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 1 of 13
 <button id="openCartBtn" class="relative px-3 py-1 border rounded text-
- sm hover:bg-gray-100">
-
+sm hover:bg-gray-100">
 Cart (<span id="cartCount">0</span>)
-
 </button>
-
 </div>
-
 </div>
-
 </header>
-
 <!-- MAIN: SHOP -->
-
 <main class="max-w-6xl mx-auto px-4 py-8">
-
 <section id="shopView" class="view">
-
 <div class="text-center pb-8">
-
 <h1 class="text-4xl font-extrabold">DABAN</h1>
-
-<p class="text-gray-600
-
-mt-1">Different — Classy, Modern, Quality </p>
-
+<p class="text-gray-600 mt-1">Different â€” Classy, Modern, Quality </p>
 </div>
-
 <!-- Filters -->
-
-<div class="flex flex-col
-
-md:flex-row md:items-center md:justify-between
-
+<div class="flex flex-col md:flex-row md:items-center md:justify-between
 gap-4 mb-6">
-
 <div class="flex items-center gap-3">
-
 <label class="text-sm font-medium">Category</label>
-
 <select id="filterCategory" class="border p-2 rounded text-sm">
-
 <option value="all">All</option>
-
-<option value="shoes">shoes</option>
-
-<option value="dresses">dresses</option>
-
-<option value="shirts">shirts</option>
-
-<option value="bags">bags</option>
-
+<option>shoes</option>
+<option>dresses</option>
+<option>shirts</option>
+<option>bags</option>
 </select>
-
 </div>
-
 <div class="flex items-center gap-3">
-
 <label class="text-sm font-medium">Search</label>
-
 <input id="filterSearch" type="search" placeholder="Search
-
-products..."
-
-class="border p-2 rounded text-sm" />
-
+products..." class="border p-2 rounded text-sm" />
 </div>
-
 </div>
-
 <!-- Products Grid -->
-
 <section id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-
-
 cols-3 gap-6"></section>
-
 <!-- Empty placeholder -->
-
 <p id="noProductsMsg" class="text-center text-gray-500 mt-8 hidden">No
- products yet — admin can add products from the Admin panel.</p>
- </section>
-
-<!-- ADMIN VIEW -->
-
-<section id="adminView" class="view hidden">
-
-<div class="max-w-4xl mx-auto">
-
-<!-- Auth panel -->
-
-<div id="adminAuthBox" class="bg-white border rounded p-6 shadow-sm mb-
- 6">
-
-<h2 class="text-xl font-bold">Admin — Sign in</h2>
-
-<p class="text-sm text-gray-600 mb-3">Enter the admin password to
-
-manage products.</p>
-
-<form id="adminLoginForm" class="flex gap-3 items-center">
-
-<input id="adminPasswordInput" type="password" placeholder="Admin
-
-password" class="border p-2 rounded flex-1" />
-
-<button class="bg-black text-white px-4 py-2 rounded"
-
-type="submit">Sign in</button>
-
-<button id="adminSignOutBtn" class="hidden px-4 py-2 border rounded
- text-sm">Sign out</button>
-
-</form>
-
-<p id="adminAuthMsg" class="text-sm text-red-600 mt-3 hidden"></p>
- </div>
-
-<!-- Admin controls -->
-
-<div id="adminControls" class="hidden space-y-6">
-
-<!-- Add/Edit product -->
-
-<div class="bg-white border rounded p-6 shadow-sm">
-
-<h3 class="font-bold text-lg mb-3">Add / Edit Product</h3>
-
-<form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-
- 4">
-
-<input id="p_name" placeholder="Product name" required
-
-class="border p-2 rounded" />
-
-<input id="p_price" type="number" step="0.01" placeholder="Price
-
-(GH¢)" required class="border p-2 rounded" />
-
-<select id="p_category" class="border p-2 rounded">
-
-<option value="">Select category</option>
-
-<option value="shoes">shoes</option>
-
-<option value="dresses">dresses</option>
-
-<option value="shirts">shirts</option>
-
-<option value="bags">bags</option>
-
-</select>
-
-<input id="p_color" placeholder="Color (optional)" class="border
-
-p-2 rounded" />
-
-<textarea id="p_description" placeholder="Short description"
-
-rows="3" class="border p-2 rounded md:col-span-2"></textarea>
-
-<!-- Category-specific options area -->
-
-<div id="categoryOptions" class="md:col-span-2 space-y-2"></div>
-
-<!-- Image capture/upload -->
-
-<div class="md:col-span-2">
-
-<label class="block text-sm font-medium mb-2">Product
-
-image</label>
-
-<div class="flex gap-2 items-center">
-
-<input id="p_image_file" type="file" accept="image/*"
-
-class="text-sm" />
- <button id="p_image_url_btn" type="button" class="px-3 py-2
- border rounded text-sm">Use Image URL</button>
-
-</div>
-
-<input id="p_image_url" placeholder="Paste image URL and press
-
-Enter" class="mt-2 border p-2 rounded w-full hidden" />
-
-<div id="p_image_preview" class="mt-3"></div>
-
-</div>
-
-<div class="md:col-span-2 flex gap-3">
-
-<button id="p_save" class="bg-black text-white px-4 py-2
-
-rounded" type="submit">Save product</button>
-
-<button id="p_cancel" type="button" class="px-4 py-2 border
-
-rounded">Clear</button>
-
-</div>
-
-</form>
-
-</div>
-
-<!-- Product list -->
-
-<div class="bg-white border rounded p-6 shadow-sm">
-
-<h3 class="font-bold text-lg mb-3">Existing products</h3>
-
-<div id="adminProductList" class="space-y-3"></div>
-
-<p id="adminNoProducts" class="text-gray-500 hidden">No products
-
-yet.</p>
-
-</div>
-
-</div>
-
-</div>
-
+products yet â€” admin can add products from the Admin panel.</p>
 </section>
-
-</main>
-
-<!-- CART DRAWER -->
-
-<div id="cartDrawer" class="fixed right-0 top-0 h-full w-full sm:w-96
-
-transform translate-x-full bg-white shadow-2xl transition-transform z-50">
-
-<div class="p-4 border-b flex justify-between items-center">
- <h4 class="font-bold">Cart</h4>
-
-<button id="closeCartBtn" class="text-xl">&times;</button>
-
+<!-- ADMIN VIEW -->
+<section id="adminView" class="view hidden">
+<div class="max-w-4xl mx-auto">
+<!-- Auth panel -->
+<div id="adminAuthBox" class="bg-white border rounded p-6 shadow-sm mb-
+6">
+<h2 class="text-xl font-bold">Admin â€” Sign in</h2>
+<p class="text-sm text-gray-600 mb-3">Enter the admin password to
+manage products.</p>
+<form id="adminLoginForm" class="flex gap-3 items-center">
+<input id="adminPasswordInput" type="password" placeholder="Admin
+password" class="border p-2 rounded flex-1" />
+<button class="bg-black text-white px-4 py-2 rounded"
+type="submit">Sign in</button>
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 2 of 13
+<button id="adminSignOutBtn" class="hidden px-4 py-2 border rounded
+text-sm">Sign out</button>
+</form>
+<p id="adminAuthMsg" class="text-sm text-red-600 mt-3 hidden"></p>
 </div>
-
-<div id="cartItems" class="p-4 space-y-4 overflow-y-auto custom-scroll"
-
-style="max-height: 72vh"></div>
-
-<div class="p-4 border-t">
-
-<div class="flex justify-between font-bold mb-3">Total <span
-
-id="cartTotal">GH¢0.00</span></div>
-
-<div class="flex gap-2">
-
-<button id="checkoutBtn"
-
-class="bg-black text-white px-4 py-2 rounded
-
-flex-1">Checkout (demo)</button>
-
-<button id="clearCartBtn" class="px-4 py-2 border
-
+<!-- Admin controls -->
+<div id="adminControls" class="hidden space-y-6">
+<!-- Add/Edit product -->
+<div class="bg-white border rounded p-6 shadow-sm">
+<h3 class="font-bold text-lg mb-3">Add / Edit Product</h3>
+<form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-
+4">
+<input id="p_name" placeholder="Product name" required
+class="border p-2 rounded" />
+<input id="p_price" type="number" step="0.01" placeholder="Price
+(GHâ‚µ)" required class="border p-2 rounded" />
+<select id="p_category" class="border p-2 rounded">
+<option value="">Select category</option>
+<option value="shoes">shoes</option>
+<option value="dresses">dresses</option>
+<option value="shirts">shirts</option>
+<option value="bags">bags</option>
+</select>
+<input id="p_color" placeholder="Color (optional)" class="border
+p-2 rounded" />
+<textarea id="p_description" placeholder="Short description"
+rows="3" class="border p-2 rounded md:col-span-2"></textarea>
+<!-- Category-specific options area -->
+<div id="categoryOptions" class="md:col-span-2 space-y-2"></div>
+<!-- Image capture/upload -->
+<div class="md:col-span-2">
+<label class="block text-sm font-medium mb-2">Product
+image</label>
+<div class="flex gap-2 items-center">
+<input id="p_image_file" type="file" accept="image/*"
+class="text-sm" />
+<button id="p_image_url_btn" type="button" class="px-3 py-2
+border rounded text-sm">Use Image URL</button>
+</div>
+<input id="p_image_url" placeholder="Paste image URL and press
+Enter" class="mt-2 border p-2 rounded w-full hidden" />
+<div id="p_image_preview" class="mt-3"></div>
+</div>
+<div class="md:col-span-2 flex gap-3">
+<button id="p_save" class="bg-black text-white px-4 py-2
+rounded" type="submit">Save product</button>
+<button id="p_cancel" type="button" class="px-4 py-2 border
 rounded">Clear</button>
-
 </div>
-
+</form>
 </div>
-
+<!-- Product list -->
+<div class="bg-white border rounded p-6 shadow-sm">
+<h3 class="font-bold text-lg mb-3">Existing products</h3>
+<div id="adminProductList" class="space-y-3"></div>
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 3 of 13
+<p id="adminNoProducts" class="text-gray-500 hidden">No products
+yet.</p>
 </div>
-
+</div>
+</div>
+</section>
+</main>
+<!-- CART DRAWER -->
+<div id="cartDrawer" class="fixed right-0 top-0 h-full w-full sm:w-96
+transform translate-x-full bg-white shadow-2xl transition-transform z-50">
+<div class="p-4 border-b flex justify-between items-center">
+<h4 class="font-bold">Cart</h4>
+<button id="closeCartBtn" class="text-xl">&times;</button>
+</div>
+<div id="cartItems" class="p-4 space-y-4 overflow-y-auto custom-scroll"
+style="max-height:72vh"></div>
+<div class="p-4 border-t">
+<div class="flex justify-between font-bold mb-3">Total <span
+id="cartTotal">GHâ‚µ0.00</span></div>
+<div class="flex gap-2">
+<button id="checkoutBtn" class="bg-black text-white px-4 py-2 rounded
+flex-1">Checkout (demo)</button>
+<button id="clearCartBtn" class="px-4 py-2 border
+rounded">Clear</button>
+</div>
+</div>
+</div>
 <!-- Modal for image capture preview or confirm -->
-
 <div id="modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-
-
 center justify-center z-60">
-
 <div class="bg-white rounded p-4 max-w-lg w-full">
-
 <div id="modalContent"></div>
-
 <div class="mt-4 text-right">
-
 <button id="modalClose" class="px-4 py-2 border rounded">Close</button>
-
 </div>
-
 </div>
-
 </div>
-
 <!-- Footer -->
-
 <footer class="mt-12 py-6 border-t text-center text-sm text-gray-500">
-
-© <span id="year"></span> DABAN — Different
-
+Â© <span id="year"></span> DABAN â€” Different
 </footer>
-
 <script>
-
-/*
-
-=====================
-
+/* =====================
 Simple localStorage-backed shop for DABAN
-
 Admin password: Daban2025
-
 Single-file: copy-paste into index.html
-
 ===================== */
-
 const ADMIN_PASSWORD = 'Daban2025'; // user-provided
-
 const STORAGE_KEY = 'daban_products_v1';
-
 const CART_KEY = 'daban_cart_v1';
-
 document.getElementById('year').textContent = new Date().getFullYear();
-
 /* Views */
-
 function switchView(name) {
-
-// Reverting to original logic, only fixing the selector error found in my previous debug.
-  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden')); 
-  if (name === 'admin') {
-    document.getElementById('adminView').classList.remove('hidden');
-  } else {
-    document.getElementById('shopView').classList.remove('hidden');
-  }
+document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+if (name === 'admin') {
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 4 of 13
+document.getElementById('adminView').classList.remove('hidden'); }
+else { document.getElementById('shopView').classList.remove('hidden'); }
 }
-
-/*
-
+switchView('shop');
+/* -------------------------
 Simple state and helpers
-
-*/
-
-let products = loadProducts(); // Initial load
+------------------------- */
+let products = loadProducts();
 let cart = loadCart();
-
 let editingProductId = null;
-
 /* Load/save functions */
-
 function loadProducts() {
-
 try {
-
 const raw = localStorage.getItem(STORAGE_KEY);
-
 if (!raw) {
-
 // seed with two sample products
-
 const seed = [
-
-{ id: genId(),
-
-name: "Monochrome Shirt", price: 120.00, description:
- "Minimal black shirt.", category: "shirts", color: "black", image: "" , createdAt:
- Date.now() },
-
-{ id: genId(),
-
-name: "Daban Tote Bag", price: 80.00, description:
-
-"Simple canvas bag.", category: "bags", color: "natural", image: "", createdAt:
- Date.now() }
-
-}
-
+{ id: genId(), name: "Monochrome Shirt", price: 120.00, description:
+"Minimal black shirt.", category: "shirts", color:"black", image: "", createdAt:
+Date.now() },
+{ id: genId(), name: "Daban Tote Bag", price: 80.00, description:
+"Simple canvas bag.", category: "bags", color:"natural", image: "", createdAt:
+Date.now() }
 ];
-// FIX: Saving the seed data before returning it (was missing in the original PDF code)
 localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
 return seed;
-
 }
-
 return JSON.parse(raw);
-
 } catch (e) {
-
 console.error("Failed load products", e);
-
 return [];
-
 }
-
 }
-
 function saveProducts() {
-// FIX: The original function was empty. This now saves the current products array.
 localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-
 }
-
 function loadCart() {
-
 try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); } catch {
- return []; }
-
+return []; }
 }
-
 function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
-
 /* Utility */
-
-function genId() { return 'p' + Math.random().toString(36).slice(2,9); }
- function money(v) { return Number (v||0).toFixed(2); }
-
-/*
-
+function genId() { return 'p_' + Math.random().toString(36).slice(2,9); }
+function money(v){ return Number(v||0).toFixed(2); }
+/* -------------------------
 Product Rendering (Shop)
-
-*/
-
+------------------------- */
 const productsGrid = document.getElementById('productsGrid');
- const noProductsMsg = document.getElementById('noProductsMsg');
- const filterCategory = document.getElementById('filterCategory');
- const filterSearch = document.getElementById('filterSearch');
-
+const noProductsMsg = document.getElementById('noProductsMsg');
+const filterCategory = document.getElementById('filterCategory');
+const filterSearch = document.getElementById('filterSearch');
 function renderProducts() {
-
 productsGrid.innerHTML = '';
-
 const cat = filterCategory.value;
-
 const q = (filterSearch.value || '').toLowerCase().trim();
-
-const filtered =
-
-products.filter(p => {
-
+const filtered = products.filter(p => {
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 5 of 13
 if (cat && cat !== 'all' && p.category !== cat) return false;
- if (q && !(p.name.toLowerCase().includes (q)
-
-||
-
-(p.description||'').toLowerCase().includes (q))) return false;
-
+if (q && !(p.name.toLowerCase().includes(q) ||
+(p.description||'').toLowerCase().includes(q))) return false;
 return true;
-
 });
-
 if (filtered.length === 0) {
-
 noProductsMsg.classList.remove('hidden');
-
 } else {
-
 noProductsMsg.classList.add('hidden');
-
+}
 filtered.forEach(p => {
-
 const card = document.createElement('article');
-
 card.className = 'bg-white border rounded shadow-sm overflow-hidden';
-
 const imgSrc = p.image || placeholderForCategory(p.category);
- card.innerHTML = `
-
+card.innerHTML = `
 <img src="${imgSrc}" alt="${escapeHtml(p.name)}" class="product-img
- cursor-pointer" onclick="viewProduct('${p.id}')"
-
-onerror="this.onerror=null; this.src='${placeholderForCategory(p.category)}'"/>
- <div class="p-4">
-
-<h3 class="font-semibold text-lg">${escapeHtml (p.name)}</h3>
-
-<p class="text-sm muted">${escapeHtml(p.category)} •
-
+cursor-pointer" onclick="viewProduct('${p.id}')"
+onerror="this.onerror=null;this.src='${placeholderForCategory(p.category)}'"/>
+<div class="p-4">
+<h3 class="font-semibold text-lg">${escapeHtml(p.name)}</h3>
+<p class="text-sm muted">${escapeHtml(p.category)} â€¢
 ${escapeHtml(p.color||'')}</p>
-
-<p class="mt-2 text-gray-700">${escapeHtml (p.description||'')}</p>
-
+<p class="mt-2 text-gray-700">${escapeHtml(p.description||'')}</p>
 <div class="mt-4 flex items-center justify-between">
-
-<div class="font-bold text-lg">GH¢ ${money(p.price)}</div>
- <div class="flex gap-2">
-
+<div class="font-bold text-lg">GHâ‚µ ${money(p.price)}</div>
+<div class="flex gap-2">
 <button class="px-3 py-1 border rounded text-sm"
-
 onclick="viewProduct('${p.id}')">View</button>
-
 <button class="bg-black text-white px-3 py-1 rounded text-sm"
- </div>
-
 onclick="addToCart('${p.id}')">Add to Cart</button>
-
 </div>
-
 </div>
-
+</div>
 `;
-
-productsGrid.appendChild(card);
-
 });
-
+productsGrid.appendChild(card);
 }
-
-}
-
-function placeholderForCategory (cat) {
-
+function placeholderForCategory(cat) {
 // simple placeholders
-
 const map = {
-
 shoes: 'https://placehold.co/600x400/000/fff?text=Shoes',
- dresses: 'https://placehold.co/600x400/000/fff?text=Dress',
- shirts: 'https://placehold.co/600x400/000/fff?text=Shirt',
-
+dresses: 'https://placehold.co/600x400/000/fff?text=Dress',
+shirts: 'https://placehold.co/600x400/000/fff?text=Shirt',
 bags: 'https://placehold.co/600x400/000/fff?text=Bag',
 };
-
 return map[cat] || 'https://placehold.co/600x400/000/fff?text=DABAN';
-
 }
-
 filterCategory.addEventListener('change', renderProducts);
- filterSearch.addEventListener('input', debounce (renderProducts, 200));
- renderProducts();
-
-/*
-
-Cart behaviour
-
-*/
-
-const openCartBtn = document.getElementById('openCartBtn');
- const cartDrawer = document.getElementById('cartDrawer');
- const cartItemsDiv = document.getElementById('cartItems');
- const cartCount = document.getElementById('cartCount');
- const cartTotalSpan = document.getElementById('cartTotal');
-
-openCartBtn.addEventListener('click', () => {
-
-cartDrawer.style.transform = 'translateX(0)';
- renderCart();
-
-});
-
-document.getElementById('closeCartBtn').addEventListener('click', () => {
-
-cartDrawer.style.transform = 'translateX(100%)';
-
-});
-
-document.getElementById('clearCartBtn').addEventListener('click', () => {
-
-cart = []; saveCart(); renderCart();
-
-});
-
-document.getElementById('checkoutBtn').addEventListener('click', () => {
-    // Reverting back to original PDF content for alerts
-    if (cart.length === 0) return alert('Cart is empty.'); 
-
-    alert('Checkout is demo-only. Use the admin panel to manage orders in a real setup.');
-
-});
-
-function addToCart (productId) {
-
-const item = products.find(p => p.id === productId);
- if (!item) return;
-
-const existing = cart.find(c => c.productId === productId);
-
-if (existing) existing.qty++;
-
-else cart.push({ productId, name: item.name, price: item.price, qty: 1 });
-
-saveCart();
-
-renderCart();
-
-}
-
-function renderCart() {
-
-cartItemsDiv.innerHTML = '';
-
-if (cart.length === 0) {
-
-cartItemsDiv.innerHTML = '<p class="text-gray-500">Your cart is empty.</p>';
- cartCount.textContent = '0';
-
-cartTotalSpan.textContent = 'GH¢0.00';
-
-return;
-
-}
-
-let total = 0;
-
-cart.forEach(ci => {
-
-const product = products.find(p => p.id === ci.productId) || {};
-
-total += (ci.price || 0) * (ci.qty || 0);
-
-const row = document.createElement('div');
-
-row.className = 'flex items-center justify-between';
-
-row.innerHTML = `
-
-<div>
-
-<div class="font-medium">${escapeHtml(ci.name)}</div>
-
-<div class="text-sm muted">GH¢ ${money(ci.price)} x ${ci.qty}</div>
- </div>
-
-<div class="flex items-center gap-2">
-
-<button class="px-2 py-1 border rounded
-
-text-sm"
- onclick="changeQty('${ci.productId}', ${ci.qty - 1})">-</button>
- <button class="px-2 py-1 border rounded
- text-sm
- "
-
-onclick="changeQty('${ci.productId}', ${ci.qty + 1})">+</button>
- </div>
-
-`;
-
-cartItemsDiv.appendChild(row);
-
-});
-
-cartCount.textContent = cart.reduce((a,b)=>a+(b.qty||0),0);
- cartTotalSpan.textContent = 'GH¢' + money(total);
-
-}
-
-function changeQty (productId, newQty) {
-
-const idx = cart.findIndex(c => c.productId === productId);
-
-if (idx === -1) return;
-
-if (newQty <= 0) cart.splice(idx, 1); else cart [idx].qty = newQty;
- saveCart(); renderCart();
-
-}
-
-/*
-
-Admin: simple password auth
-
-*/
-
-const adminLoginForm = document.getElementById('adminLoginForm');
-
-const adminPasswordInput = document.getElementById('adminPasswordInput');
-
-const adminAuthMsg = document.getElementById('adminAuthMsg');
-
-const adminControls = document.getElementById('adminControls');
-
-const adminSignOutBtn = document.getElementById('adminSignOutBtn');
-
-function isAdminSignedIn() {
-
-return sessionStorage.getItem('daban_admin_signed') === '1';
-
-}
-
-function setAdminSigned (val) {
-
-if (val) sessionStorage.setItem('daban_admin_signed', '1'); else
- sessionStorage.removeItem('daban_admin_signed');
- refreshAdminUI();
-
-}
-
-adminLoginForm.addEventListener('submit', (e) => {
-
-e.preventDefault();
-
-const v = adminPasswordInput.value || '';
-
-if (v === ADMIN_PASSWORD) {
-
-setAdminSigned(true);
-
-adminPasswordInput.value = '';
-
-adminAuthMsg.classList.add('hidden');
-
-showToast('Signed in as admin');
-
-} else {
-
-adminAuthMsg.textContent = 'Wrong password';
-
-adminAuthMsg.classList.remove('hidden');
-
-}
-
-});
-
-adminSignOutBtn.addEventListener('click', () => {
-
-setAdminSigned(false);
-
-showToast('Signed out');
-
-});
-
-function refreshAdminUI() {
-
-if (isAdminSignedIn()) {
-
-adminControls.classList.remove('hidden');
-
-adminSignOutBtn.classList.remove('hidden');
-
-adminPasswordInput.classList.add('hidden');
-
-document.getElementById('adminAuthMsg').classList.add('hidden');
-
-} else {
-
-adminControls.classList.add('hidden');
-
-adminSignOutBtn.classList.add('hidden');
-
-adminPasswordInput.classList.remove('hidden');
-
-}
-
-}
-
-refreshAdminUI();
-
-/*
-
-Admin: product form logic
-
-*/
-
-const productForm = document.getElementById('productForm');
-
-const p_name = document.getElementById('p_name');
-
-const p_price = document.getElementById('p_price');
-
-const p_category = document.getElementById('p_category');
-
-const p_description = document.getElementById('p_description');
- const p_color = document.getElementById('p_color');
-
-const p_image_file = document.getElementById('p_image_file');
- const p_image_preview = document.getElementById('p_image_preview');
- const p_image_url_btn = document.getElementById('p_image_url_btn');
- const p_image_url = document.getElementById('p_image_url');
- const categoryOptions = document.getElementById('categoryOptions');
-
-p_image_url_btn.addEventListener('click', () => {
-
-p_image_url.classList.toggle('hidden');
-
-if (!p_image_url.classList.contains('hidden')) p_image_url.focus();
-
-});
-
-p_image_url.addEventListener('keydown', (e) => {
-
-if (e.key === 'Enter') {
-
-e.preventDefault();
-
-const v = p_image_url.value.trim();
-
-if (v) {
-
-setPreviewImage(v);
-
-p_image_url.value = '';
-
-p_image_url.classList.add('hidden');
-
-}
-
-}
-
-});
-
-p_image_file.addEventListener('change', async (e) => {
-
-const f = e.target.files && e.target.files[0];
-
-if (!f) return;
-
-// read as base64
-
-const base = await fileToBase64(f);
-
-setPreviewImage(base);
-
-});
-
-function setPreviewImage(src) {
-
-p_image_preview.innerHTML = `<img src="${src}" alt="preview" class="w-48 h-48
-
-object-cover border rounded" />`;
-
-p_image_preview.dataset.src = src;
-
-}
-
-/* category-specific options */
-
-p_category.addEventListener('change', () => {
-
-renderCategoryOptions(p_category.value);
-
-});
-
-function renderCategoryOptions (cat) {
-
-categoryOptions.innerHTML = '';
-
-if (!cat) return;
-
-if (['shoes', 'shirts', 'dresses'].includes (cat)) {
-
-// sizes
-
-const sizes = (cat === 'shoes') ?
-
-['35','37', '38', '39', '40', '41', '42', '43', '44', '45', '46']: (cat === 'dresses'?
-
-['XS', 'S', 'M', 'L', 'XL'] : ['S', 'M', 'L', 'XL']);
-
-const sel = document.createElement('select');
-
-sel.id = 'p_size';
-
-sel.className = 'border p-2 rounded';
-
-sel.innerHTML = `<option value="">Size (optional)</option>${sizes.map(s =>
-
-`<option value="${s}">${s}</option>` ).join('')}`;
-
-categoryOptions.appendChild(sel);
-
-} else if (cat === 'bags') {
-
-const label = document.createElement('div');
-
-label.className = 'text-sm text-gray-600';
-
-label.textContent = 'Bag options: (optional) add strap length or material in
-
-Color field';
-
-categoryOptions.appendChild(label);
-
-}
-
-}
-
-/* Save product */
-
-productForm.addEventListener('submit', (e) => {
-
-e.preventDefault();
-
-if (!isAdminSignedIn()) return showToast('Please sign in as admin.'); 
-
-const name = p_name.value.trim();
-
-const price = parseFloat(p_price.value);
-
-const category = p_category.value;
-
-const description = p_description.value.trim();
-
-const color = p_color.value.trim();
-
-const image = p_image_preview.dataset.src || '';
-
-const sizeElem = document.getElementById('p_size');
-
-const size = sizeElem? sizeElem.value: '';
-
-if (!name || !category || isNaN(price) || price <= 0) {
-
-return showToast('Please provide product name, valid price and category.'); 
-
-}
-
-const payload = {
-
-id: editingProductId || genId(),
-
-name, price, description, category, color, size,
-
-image, createdAt: Date.now()
-
-};
-
-if (editingProductId) {
-
-const idx = products.findIndex(p => p.id === editingProductId);
- if (idx !== -1) products.splice(idx, 1, payload);
-
-editingProductId = null;
-
-} else {
-
-products.unshift(payload); // newest first
-
-}
-
-saveProducts();
-
-resetProductForm();
-
+filterSearch.addEventListener('input', debounce(renderProducts, 200));
 renderProducts();
-
-showToast('Product saved');
-
+/* -------------------------
+Cart behaviour
+------------------------- */
+const openCartBtn = document.getElementById('openCartBtn');
+const cartDrawer = document.getElementById('cartDrawer');
+const cartItemsDiv = document.getElementById('cartItems');
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 6 of 13
+const cartCount = document.getElementById('cartCount');
+const cartTotalSpan = document.getElementById('cartTotal');
+openCartBtn.addEventListener('click', () => {
+cartDrawer.style.transform = 'translateX(0)';
+renderCart();
 });
-
-document.getElementById('p_cancel').addEventListener('click', resetProductForm);
-
-function resetProductForm() {
-
-productForm.reset();
-
-p_image_preview.innerHTML = '';
-
-delete p_image_preview.dataset.src;
-
-editingProductId = null;
-
+document.getElementById('closeCartBtn').addEventListener('click', () => {
+cartDrawer.style.transform = 'translateX(100%)';
+});
+document.getElementById('clearCartBtn').addEventListener('click', () => {
+cart = []; saveCart(); renderCart();
+});
+document.getElementById('checkoutBtn').addEventListener('click', () => {
+if (cart.length === 0) return alert('Cart is empty.');
+alert('Checkout is demo-only. Use the admin panel to manage orders in a real
+setup.');
+});
+function addToCart(productId) {
+const item = products.find(p => p.id === productId);
+if (!item) return;
+const existing = cart.find(c => c.productId === productId);
+if (existing) existing.qty++;
+else cart.push({ productId, name: item.name, price: item.price, qty: 1 });
+saveCart();
+renderCart();
+}
+function renderCart() {
+cartItemsDiv.innerHTML = '';
+if (cart.length === 0) {
+cartItemsDiv.innerHTML = '<p class="text-gray-500">Your cart is empty.</p>';
+cartCount.textContent = '0';
+cartTotalSpan.textContent = 'GHâ‚µ0.00';
+return;
+}
+let total = 0;
+cart.forEach(ci => {
+const product = products.find(p => p.id === ci.productId) || {};
+total += (ci.price || 0) * (ci.qty || 0);
+const row = document.createElement('div');
+row.className = 'flex items-center justify-between';
+row.innerHTML = `
+<div>
+<div class="font-medium">${escapeHtml(ci.name)}</div>
+<div class="text-sm muted">GHâ‚µ ${money(ci.price)} Ã— ${ci.qty}</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-2 py-1 border rounded text-sm"
+onclick="changeQty('${ci.productId}', ${ci.qty - 1})">-</button>
+<button class="px-2 py-1 border rounded text-sm"
+onclick="changeQty('${ci.productId}', ${ci.qty + 1})">+</button>
+</div>
+`;
+cartItemsDiv.appendChild(row);
+});
+cartCount.textContent = cart.reduce((a,b)=>a+(b.qty||0),0);
+cartTotalSpan.textContent = 'GHâ‚µ' + money(total);
+}
+function changeQty(productId, newQty) {
+const idx = cart.findIndex(c => c.productId === productId);
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 7 of 13
+if (idx === -1) return;
+if (newQty <= 0) cart.splice(idx,1); else cart[idx].qty = newQty;
+saveCart(); renderCart();
+}
+/* -------------------------
+Admin: simple password auth
+------------------------- */
+const adminLoginForm = document.getElementById('adminLoginForm');
+const adminPasswordInput = document.getElementById('adminPasswordInput');
+const adminAuthMsg = document.getElementById('adminAuthMsg');
+const adminControls = document.getElementById('adminControls');
+const adminSignOutBtn = document.getElementById('adminSignOutBtn');
+function isAdminSignedIn() {
+return sessionStorage.getItem('daban_admin_signed') === '1';
+}
+function setAdminSigned(val) {
+if (val) sessionStorage.setItem('daban_admin_signed','1'); else
+sessionStorage.removeItem('daban_admin_signed');
+refreshAdminUI();
+}
+adminLoginForm.addEventListener('submit', (e) => {
+e.preventDefault();
+const v = adminPasswordInput.value || '';
+if (v === ADMIN_PASSWORD) {
+setAdminSigned(true);
+adminPasswordInput.value = '';
+adminAuthMsg.classList.add('hidden');
+showToast('Signed in as admin');
+} else {
+adminAuthMsg.textContent = 'Wrong password';
+adminAuthMsg.classList.remove('hidden');
+}
+});
+adminSignOutBtn.addEventListener('click', () => {
+setAdminSigned(false);
+showToast('Signed out');
+});
+function refreshAdminUI() {
+if (isAdminSignedIn()) {
+adminControls.classList.remove('hidden');
+adminSignOutBtn.classList.remove('hidden');
+adminPasswordInput.classList.add('hidden');
+document.getElementById('adminAuthMsg').classList.add('hidden');
+} else {
+adminControls.classList.add('hidden');
+adminSignOutBtn.classList.add('hidden');
+adminPasswordInput.classList.remove('hidden');
+}
+}
+refreshAdminUI();
+/* -------------------------
+Admin: product form logic
+------------------------- */
+const productForm = document.getElementById('productForm');
+const p_name = document.getElementById('p_name');
+const p_price = document.getElementById('p_price');
+const p_category = document.getElementById('p_category');
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 8 of 13
+const p_description = document.getElementById('p_description');
+const p_color = document.getElementById('p_color');
+const p_image_file = document.getElementById('p_image_file');
+const p_image_preview = document.getElementById('p_image_preview');
+const p_image_url_btn = document.getElementById('p_image_url_btn');
+const p_image_url = document.getElementById('p_image_url');
+const categoryOptions = document.getElementById('categoryOptions');
+p_image_url_btn.addEventListener('click', () => {
+p_image_url.classList.toggle('hidden');
+if (!p_image_url.classList.contains('hidden')) p_image_url.focus();
+});
+p_image_url.addEventListener('keydown', (e) => {
+if (e.key === 'Enter') {
+e.preventDefault();
+const v = p_image_url.value.trim();
+if (v) {
+setPreviewImage(v);
+p_image_url.value = '';
+p_image_url.classList.add('hidden');
+}
+}
+});
+p_image_file.addEventListener('change', async (e) => {
+const f = e.target.files && e.target.files[0];
+if (!f) return;
+// read as base64
+const base = await fileToBase64(f);
+setPreviewImage(base);
+});
+function setPreviewImage(src) {
+p_image_preview.innerHTML = `<img src="${src}" alt="preview" class="w-48 h-48
+object-cover border rounded" />`;
+p_image_preview.dataset.src = src;
+}
+/* category-specific options */
+p_category.addEventListener('change', () => {
+renderCategoryOptions(p_category.value);
+});
+function renderCategoryOptions(cat) {
 categoryOptions.innerHTML = '';
-
+if (!cat) return;
+if (['shoes','shirts','dresses'].includes(cat)) {
+// sizes
+const sizes = (cat === 'shoes') ?
+['35','37','38','39','40','41','42','43','44','45', '46'] : (cat === 'dresses' ?
+['XS','S','M','L','XL'] : ['S','M','L','XL']);
+const sel = document.createElement('select');
+sel.id = 'p_size';
+sel.className = 'border p-2 rounded';
+sel.innerHTML = `<option value="">Size (optional)</option>` + sizes.map(s =>
+`<option value="${s}">${s}</option>`).join('');
+categoryOptions.appendChild(sel);
+} else if (cat === 'bags') {
+const label = document.createElement('div');
+label.className = 'text-sm text-gray-600';
+label.textContent = 'Bag options: (optional) add strap length or material in
+Color field';
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 9 of 13
+categoryOptions.appendChild(label);
 }
-
+}
+/* Save product */
+productForm.addEventListener('submit', (e) => {
+e.preventDefault();
+if (!isAdminSignedIn()) return alert('Please sign in as admin.');
+const name = p_name.value.trim();
+const price = parseFloat(p_price.value);
+const category = p_category.value;
+const description = p_description.value.trim();
+const color = p_color.value.trim();
+const image = p_image_preview.dataset.src || '';
+const sizeElem = document.getElementById('p_size');
+const size = sizeElem ? sizeElem.value : '';
+if (!name || !category || isNaN(price) || price <= 0) {
+return alert('Please provide product name, valid price and category.');
+}
+const payload = {
+id: editingProductId || genId(),
+name, price, description, category, color, size,
+image, createdAt: Date.now()
+};
+if (editingProductId) {
+const idx = products.findIndex(p => p.id === editingProductId);
+if (idx !== -1) products.splice(idx, 1, payload);
+editingProductId = null;
+} else {
+products.unshift(payload); // newest first
+}
+saveProducts();
+resetProductForm();
+renderProducts();
+renderAdminList();
+showToast('Product saved');
+});
+document.getElementById('p_cancel').addEventListener('click', resetProductForm);
+function resetProductForm() {
+productForm.reset();
+p_image_preview.innerHTML = '';
+delete p_image_preview.dataset.src;
+editingProductId = null;
+categoryOptions.innerHTML = '';
+}
 /* Admin product list */
-
 function renderAdminList() {
-
 const list = document.getElementById('adminProductList');
-
 list.innerHTML = '';
-
 if (!products || products.length === 0) {
-
 document.getElementById('adminNoProducts').classList.remove('hidden');
- return;
-
+return;
 }
-
 document.getElementById('adminNoProducts').classList.add('hidden');
-
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 10 of 13
 products.forEach(p => {
- const row = document.createElement('div');
- row.className = 'flex items-center justify-between p-3 border rounded';
- row.innerHTML = `
- <div class="flex items-center gap-3 min-w-0">
- <img src="${p.image || placeholderForCategory(p.category)}" class="w-14 
-h-14 object-cover rounded" 
+const row = document.createElement('div');
+row.className = 'flex items-center justify-between p-3 border rounded';
+row.innerHTML = `
+<div class="flex items-center gap-3 min-w-0">
+<img src="${p.image || placeholderForCategory(p.category)}" class="w-14
+h-14 object-cover rounded"
 onerror="this.onerror=null;this.src='${placeholderForCategory(p.category)}'"/>
- <div class="min-w-0">
- <div class="font-medium truncate">${escapeHtml(p.name)}</div>
- <div class="text-sm muted truncate">GH¢ ${money(p.price)} • 
-${escapeHtml(p.category)} ${p.size ? ' • ' + escapeHtml(p.size) : ''}</div>
- </div>
- </div>
- <div class="flex items-center gap-2">
- <button class="px-3 py-1 text-sm border rounded" 
+<div class="min-w-0">
+<div class="font-medium truncate">${escapeHtml(p.name)}</div>
+<div class="text-sm muted truncate">GHâ‚µ ${money(p.price)} â€¢
+${escapeHtml(p.category)} ${p.size ? ' â€¢ ' + escapeHtml(p.size) : ''}</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 text-sm border rounded"
 onclick="editProduct('${p.id}')">Edit</button>
- <button class="px-3 py-1 text-sm bg-red-600 text-white rounded" 
+<button class="px-3 py-1 text-sm bg-red-600 text-white rounded"
 onclick="deleteProduct('${p.id}')">Delete</button>
- </div>
- `;
- list.appendChild(row);
- });
+</div>
+`;
+});
+list.appendChild(row);
 }
 renderAdminList();
 function editProduct(id) {
- if (!isAdminSignedIn()) return alert('Please sign in as admin.'); // Using original alert
- const p = products.find(x => x.id === id);
- if (!p) return;
- editingProductId = id;
- p_name.value = p.name;
- p_price.value = p.price;
- p_category.value = p.category;
- p_description.value = p.description || '';
- p_color.value = p.color || '';
- if (p.size) {
- renderCategoryOptions(p.category);
- setTimeout(()=>{ const s = document.getElementById('p_size'); if (s) s.value 
+if (!isAdminSignedIn()) return alert('Please sign in as admin.');
+const p = products.find(x => x.id === id);
+if (!p) return;
+editingProductId = id;
+p_name.value = p.name;
+p_price.value = p.price;
+p_category.value = p.category;
+p_description.value = p.description || '';
+p_color.value = p.color || '';
+if (p.size) {
+renderCategoryOptions(p.category);
+setTimeout(()=>{ const s = document.getElementById('p_size'); if (s) s.value
 = p.size; }, 30);
- } else {
- renderCategoryOptions(p.category);
- }
- if (p.image) setPreviewImage(p.image);
- window.scrollTo({ top: 0, behavior: 'smooth' });
+} else {
+renderCategoryOptions(p.category);
+}
+if (p.image) setPreviewImage(p.image);
+window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function deleteProduct(id) {
- if (!confirm('Delete product permanently?')) return; // Using original confirm
- const idx = products.findIndex(p => p.id === id);
- if (idx !== -1) products.splice(idx,1);
- saveProducts();
- renderProducts();
- renderAdminList();
- showToast('Product deleted');
+if (!confirm('Delete product permanently?')) return;
+const idx = products.findIndex(p => p.id === id);
+if (idx !== -1) products.splice(idx,1);
+saveProducts();
+renderProducts();
+renderAdminList();
+showToast('Product deleted');
 }
 /* -------------------------
- Small helpers
- ------------------------- */
+Small helpers
+------------------------- */
 function fileToBase64(file) {
- return new Promise((res, rej) => {
- const reader = new FileReader();
- reader.onload = () => res(reader.result);
- reader.onerror = rej;
- reader.readAsDataURL(file);
- });
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 11 of 13
+return new Promise((res, rej) => {
+const reader = new FileReader();
+reader.onload = () => res(reader.result);
+reader.onerror = rej;
+reader.readAsDataURL(file);
+});
 }
-function escapeHtml(s){ return 
+function escapeHtml(s){ return
 String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt
 ;'); }
-function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); 
+function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t);
 t=setTimeout(()=>fn(...a), ms); } }
 /* product viewer (simple modal) */
 function viewProduct(id) {
- const p = products.find(x=>x.id===id);
- if (!p) return;
- const modal = document.getElementById('modal');
- const content = document.getElementById('modalContent');
- content.innerHTML = `
- <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
- <div class="md:col-span-2">
- <img src="${p.image || placeholderForCategory(p.category)}" class="w-full max-h-[300px] object-contain rounded" 
+const p = products.find(x=>x.id===id);
+if (!p) return;
+const modal = document.getElementById('modal');
+const content = document.getElementById('modalContent');
+content.innerHTML = `
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2">
+<img src="${p.image || placeholderForCategory(p.category)}" class="w-
+full max-h-[300px] object-contain rounded"
 onerror="this.onerror=null;this.src='${placeholderForCategory(p.category)}'"/>
- </div>
- <div class="md:col-span-1">
- <h3 class="text-xl font-bold">${escapeHtml(p.name)}</h3>
- <div class="muted my-2">${escapeHtml(p.category)} • 
+</div>
+<div class="md:col-span-1">
+<h3 class="text-xl font-bold">${escapeHtml(p.name)}</h3>
+<div class="muted my-2">${escapeHtml(p.category)} â€¢
 ${escapeHtml(p.color||'')}</div>
- <div class="font-bold text-lg mb-2">GH¢ ${money(p.price)}</div>
- <p class="text-gray-700">${escapeHtml(p.description||'')}</p>
- </div>
- </div>
- `;
- modal.classList.remove('hidden'); modal.style.display = 'flex';
- document.getElementById('modalClose').onclick = closeModal;
+<div class="font-bold text-lg mb-2">GHâ‚µ ${money(p.price)}</div>
+<p class="text-gray-700">${escapeHtml(p.description||'')}</p>
+</div>
+</div>
+`;
+modal.classList.remove('hidden'); modal.style.display = 'flex';
+document.getElementById('modalClose').onclick = closeModal;
 }
-function closeModal(){ document.getElementById('modal').classList.add('hidden'); 
+function closeModal(){ document.getElementById('modal').classList.add('hidden');
 document.getElementById('modal').style.display = 'none'; }
 /* Admin helpers for quick UI */
 function showToast(msg) {
- // tiny toast (use alert fallback)
- try {
- const el = document.createElement('div');
- el.textContent = msg;
- el.className = 'fixed bottom-6 right-6 bg-black text-white px-4 py-2 rounded 
+// tiny toast (use alert fallback)
+try {
+const el = document.createElement('div');
+el.textContent = msg;
+el.className = 'fixed bottom-6 right-6 bg-black text-white px-4 py-2 rounded
 shadow';
- document.body.appendChild(el);
- setTimeout(()=> el.remove(), 2200);
- } catch { alert(msg); }
+document.body.appendChild(el);
+setTimeout(()=> el.remove(), 2200);
+} catch { alert(msg); }
 }
 /* Editing on page load if admin session exists */
 if (isAdminSignedIn()) refreshAdminUI();
@@ -1190,20 +694,22 @@ window.switchView = switchView;
 window.addToCart = addToCart;
 window.viewProduct = viewProduct;
 window.editProduct = editProduct;
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 12 of 13
 window.deleteProduct = deleteProduct;
 /* set initial UI based on query param */
 (function initFromQuery(){
- const u = new URL(location);
- if (u.searchParams.get('view') === 'admin') switchView('admin');
- if (u.hash === '#admin') switchView('admin');
+const u = new URL(location);
+if (u.searchParams.get('view') === 'admin') switchView('admin');
+if (u.hash === '#admin') switchView('admin');
 })();
 /* small: update admin UI after sign-in change */
-window.addEventListener('storage', () => { renderProducts(); renderAdminList(); 
+window.addEventListener('storage', () => { renderProducts(); renderAdminList();
 renderCart(); refreshAdminUI(); });
 /* render admin list whenever products change */
 (function attachSaveWatcher(){
- const originalSaveProducts = saveProducts;
- saveProducts = function() { originalSaveProducts(); renderAdminList(); 
+const originalSaveProducts = saveProducts;
+saveProducts = function() { originalSaveProducts(); renderAdminList();
 renderProducts(); };
 })();
 /* initial render of cart & product list */
@@ -1213,5 +719,5 @@ renderAdminList();
 </script>
 </body>
 </html>
-
-
+blob:https://github.com/ef2c3f6e-073f-4f81-8754-a0226924914b 12/11/2025, 7:13 PM
+Page 13 of 13
