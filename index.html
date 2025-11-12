@@ -80,9 +80,10 @@ body { background: white; color: #000; overflow-x: hidden; }
 
 onclick="switchView('shop')">
 
-<img src="https://placehold.co/40x40/000/fff?text=DABAN"
+<!-- Reverting logo source back to original PDF content's intention -->
+<img src="https://github.com/rk0907/birthday-page/blob/3c4b4bcfe2543c63740a211ce660e4c504bf3090/IMG_0200.jpeg"
 
-alt="DABAN Logo" class="w-10 h-10 rounded-md object-contain"
+alt="DABAN Logo" class="w-15 h-15 rounded-md object-contain"
 
 onerror="this.onerror=null;this.src='https://placehold.co/40x40/000/fff?text=DABAN'" />
 
@@ -430,7 +431,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 function switchView(name) {
 
-// BUG FIX: Used the correct class selector (.view) and removed recursive call.
+// Reverting to original logic, only fixing the selector error found in my previous debug.
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden')); 
   if (name === 'admin') {
     document.getElementById('adminView').classList.remove('hidden');
@@ -445,7 +446,7 @@ Simple state and helpers
 
 */
 
-let products = loadProducts();
+let products = loadProducts(); // Initial load
 let cart = loadCart();
 
 let editingProductId = null;
@@ -453,39 +454,55 @@ let editingProductId = null;
 /* Load/save functions */
 
 function loadProducts() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-            // If data exists, parse and return it.
-            return JSON.parse(raw);
-        }
 
-        // If no data exists, seed with sample products.
-        const seed = [
-            { id: genId(),
-              name: "Monochrome Shirt", price: 120.00, description:
-              "Minimal black shirt.", category: "shirts", color: "black", image: "", createdAt:
-              Date.now() },
-            { id: genId(),
-              name: "Daban Tote Bag", price: 80.00, description:
-              "Simple canvas bag.", category: "bags", color: "natural", image: "", createdAt:
-              Date.now() }
-        ];
+try {
 
-        // Save the seed before returning.
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-        return seed;
+const raw = localStorage.getItem(STORAGE_KEY);
 
-    } catch (e) {
-        // Corrected structure to properly handle error and product loading flow.
-        console.error("Failed load products", e);
-        return [];
-    }
+if (!raw) {
+
+// seed with two sample products
+
+const seed = [
+
+{ id: genId(),
+
+name: "Monochrome Shirt", price: 120.00, description:
+ "Minimal black shirt.", category: "shirts", color: "black", image: "" , createdAt:
+ Date.now() },
+
+{ id: genId(),
+
+name: "Daban Tote Bag", price: 80.00, description:
+
+"Simple canvas bag.", category: "bags", color: "natural", image: "", createdAt:
+ Date.now() }
+
+}
+
+];
+// FIX: Saving the seed data before returning it (was missing in the original PDF code)
+localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+return seed;
+
+}
+
+return JSON.parse(raw);
+
+} catch (e) {
+
+console.error("Failed load products", e);
+
+return [];
+
+}
+
 }
 
 function saveProducts() {
-    // BUG FIX: The original code had an empty function body. This ensures products are saved.
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+// FIX: The original function was empty. This now saves the current products array.
+localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+
 }
 
 function loadCart() {
@@ -648,10 +665,10 @@ cart = []; saveCart(); renderCart();
 });
 
 document.getElementById('checkoutBtn').addEventListener('click', () => {
+    // Reverting back to original PDF content for alerts
+    if (cart.length === 0) return alert('Cart is empty.'); 
 
-if (cart.length === 0) return showToast('Cart is empty.');
-
-showToast('Checkout is demo-only. Use the admin panel to manage orders in a real setup.');
+    alert('Checkout is demo-only. Use the admin panel to manage orders in a real setup.');
 
 });
 
@@ -818,8 +835,6 @@ adminSignOutBtn.classList.remove('hidden');
 adminPasswordInput.classList.add('hidden');
 
 document.getElementById('adminAuthMsg').classList.add('hidden');
-    // Ensure the admin product list is rendered when signed in
-    renderAdminList(); 
 
 } else {
 
@@ -1086,7 +1101,7 @@ onclick="deleteProduct('${p.id}')">Delete</button>
 }
 renderAdminList();
 function editProduct(id) {
- if (!isAdminSignedIn()) return showToast('Please sign in as admin.'); 
+ if (!isAdminSignedIn()) return alert('Please sign in as admin.'); // Using original alert
  const p = products.find(x => x.id === id);
  if (!p) return;
  editingProductId = id;
@@ -1106,14 +1121,13 @@ function editProduct(id) {
  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function deleteProduct(id) {
- // Using standard confirm() as a simple confirmation mechanism here.
- if (confirm('Delete product permanently?')) { 
-    const idx = products.findIndex(p => p.id === id);
-    if (idx !== -1) products.splice(idx,1);
-    saveProducts();
-    renderProducts();
-    showToast('Product deleted');
- }
+ if (!confirm('Delete product permanently?')) return; // Using original confirm
+ const idx = products.findIndex(p => p.id === id);
+ if (idx !== -1) products.splice(idx,1);
+ saveProducts();
+ renderProducts();
+ renderAdminList();
+ showToast('Product deleted');
 }
 /* -------------------------
  Small helpers
@@ -1167,7 +1181,7 @@ function showToast(msg) {
 shadow';
  document.body.appendChild(el);
  setTimeout(()=> el.remove(), 2200);
- } catch { alert(msg); } // Kept original alert fallback
+ } catch { alert(msg); }
 }
 /* Editing on page load if admin session exists */
 if (isAdminSignedIn()) refreshAdminUI();
@@ -1199,4 +1213,5 @@ renderAdminList();
 </script>
 </body>
 </html>
+
 
