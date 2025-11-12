@@ -39,7 +39,7 @@
     <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('shop')">
                 <img src=https://github.com/rk0907/birthday-page/blob/3c4b4bcfe2543c63740a211ce660e4c504bf3090/IMG_0200.jpeg
-     alt="DABAN Logo" class="w-10 h-10 rounded-md object-contain" 
+     alt="DABAN Logo" class="w-15 h-15 rounded-md object-contain" 
                   onerror="this.onerror=null;this.src='https://placehold.co/40x40/000/fff?text=DABAN'" />
         <div>
           <div class="text-lg font-extrabold">DABAN</div>
@@ -64,7 +64,7 @@
     <section id="shopView" class="view">
       <div class="text-center pb-8">
         <h1 class="text-4xl font-extrabold">DABAN</h1>
-        <p class="text-gray-600 mt-1">Different — Minimal, Modern, Monochrome with Gold Accent</p>
+        <p class="text-gray-600 mt-1">Different — Classy, Modern, Quality </p>
       </div>
 
       <!-- Filters -->
@@ -489,7 +489,7 @@ function renderCategoryOptions(cat) {
   if (!cat) return;
   if (['shoes','shirts','dresses'].includes(cat)) {
     // sizes
-    const sizes = (cat === 'shoes') ? ['6','7','8','9','10','11'] : (cat === 'dresses' ? ['XS','S','M','L','XL'] : ['S','M','L','XL']);
+    const sizes = (cat === 'shoes') ? ['35','37','38','39','40','41','42','43','44','45', '46'] : (cat === 'dresses' ? ['XS','S','M','L','XL'] : ['S','M','L','XL']);
     const sel = document.createElement('select');
     sel.id = 'p_size';
     sel.className = 'border p-2 rounded';
@@ -633,10 +633,12 @@ function viewProduct(id) {
   if (!p) return;
   const modal = document.getElementById('modal');
   const content = document.getElementById('modalContent');
-  content.innerHTML = `
-    <div class="flex gap-4">
-      <img src="${p.image || placeholderForCategory(p.category)}" class="w-48 h-48 object-cover rounded" onerror="this.onerror=null;this.src='${placeholderForCategory(p.category)}'"/>
-      <div>
+    content.innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2">
+        <img src="${p.image || placeholderForCategory(p.category)}" class="w-full max-h-[300px] object-contain rounded" onerror="this.onerror=null;this.src='${placeholderForCategory(p.category)}'"/>
+      </div>
+      <div class="md:col-span-1">
         <h3 class="text-xl font-bold">${escapeHtml(p.name)}</h3>
         <div class="muted my-2">${escapeHtml(p.category)} • ${escapeHtml(p.color||'')}</div>
         <div class="font-bold text-lg mb-2">GH₵ ${money(p.price)}</div>
